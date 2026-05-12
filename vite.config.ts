@@ -7,22 +7,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  cloudflare: false,
   vite: {
     build: {
       chunkSizeWarningLimit: 800,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            "vendor-react": ["react", "react-dom"],
-            "vendor-tanstack": ["@tanstack/react-router", "@tanstack/react-query", "@tanstack/react-start"],
-            "vendor-supabase": ["@supabase/supabase-js"],
-            "vendor-ui": ["lucide-react", "clsx", "tailwind-merge"],
-            "vendor-charts": ["recharts"],
-            "vendor-pdf": ["jspdf", "html2canvas"],
-            "vendor-utils": ["zod", "date-fns", "react-hook-form"],
-          },
-        },
-      },
     },
   },
 });
+

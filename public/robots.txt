@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /app/profile
+Disallow: /app/wallet
+Disallow: /app/checkout
+Disallow: /app/notifications
+Disallow: /auth
+
+Sitemap: https://amiragold.com/sitemap.xml

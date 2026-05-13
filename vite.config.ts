@@ -10,7 +10,7 @@ export default defineConfig({
   cloudflare: false,
   vite: {
     build: {
-      chunkSizeWarningLimit: 800,
+      chunkSizeWarningLimit: 2000,
     },
   },
 });

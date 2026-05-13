@@ -77,6 +77,65 @@ function AboutPage() {
         </div>
       </section>
 
+      {/* Our Values Section */}
+      <section className="border-t border-border/40 bg-card/30 py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold md:text-4xl">Our Core Values</h2>
+            <p className="mt-3 text-muted-foreground">The principles that guide everything we do at Amira Gold.</p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                title: "Absolute Transparency",
+                desc: "No hidden fees, transparent spot pricing, and public proof of reserves. We believe trust is built on radical openness."
+              },
+              {
+                title: "Uncompromising Security",
+                desc: "Your assets are protected by military-grade encryption, strict access controls, and comprehensive insurance from Lloyd's of London."
+              },
+              {
+                title: "Financial Sovereignty",
+                desc: "We empower individuals to take true ownership of their wealth outside the traditional fractional-reserve banking system."
+              }
+            ].map((value, idx) => (
+              <div key={idx} className="rounded-2xl border border-border/50 bg-background p-8 text-center transition-all hover:border-gold/40 hover:shadow-gold">
+                <h3 className="text-xl font-semibold text-foreground">{value.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{value.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Corporate Info / Locations */}
+      <section className="mx-auto max-w-7xl px-4 pb-20">
+        <div className="grid gap-12 md:grid-cols-2">
+          <div className="rounded-3xl border border-border/60 bg-card/50 p-10">
+            <h3 className="text-2xl font-bold">Global Headquarters</h3>
+            <p className="mt-4 text-muted-foreground">
+              Amira Gold Ltd.<br />
+              Level 42, Dubai International Financial Centre (DIFC)<br />
+              Dubai, United Arab Emirates
+            </p>
+            <div className="mt-6 flex items-center gap-2 text-sm font-medium text-emerald">
+              <Globe2 className="h-4 w-4" /> Regulated Entity
+            </div>
+          </div>
+          <div className="rounded-3xl border border-border/60 bg-card/50 p-10">
+            <h3 className="text-2xl font-bold">European Office</h3>
+            <p className="mt-4 text-muted-foreground">
+              Amira Gold AG<br />
+              Bahnhofstrasse 100<br />
+              8001 Zurich, Switzerland
+            </p>
+            <div className="mt-6 flex items-center gap-2 text-sm font-medium text-emerald">
+              <Globe2 className="h-4 w-4" /> LBMA Associate Member
+            </div>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   );

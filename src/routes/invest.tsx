@@ -80,6 +80,52 @@ function InvestPage() {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="border-t border-border/40 bg-card/30 py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-16 text-center">
+            <span className="text-xs font-semibold uppercase tracking-widest text-gold">The Process</span>
+            <h2 className="mt-2 text-3xl font-bold md:text-4xl">How digital fractional gold works</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              We bridge the gap between traditional physical gold markets and modern fintech. Here is exactly what happens when you invest through Amira Gold.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+             {[
+               { n: "01", t: "Fund Your Account", d: "Deposit funds easily via international wire transfer, credit card, or supported digital currencies. Your uninvested funds are held securely in segregated, top-tier banking institutions." },
+               { n: "02", t: "Buy Fractional Gold", d: "Purchase gold based on exact weight (down to 0.01g) or a specific dollar amount. Your order is instantly executed against the live global spot price, completely bypassing expensive retail premiums." },
+               { n: "03", t: "Physical Allocation", d: "The moment your trade settles, physical gold bullion of the exact equivalent weight is legally allocated to your name in our LBMA-certified, fully insured vaults." },
+               { n: "04", t: "Monitor Portfolio", d: "Track your gold's performance in real-time. View daily valuation changes, historical trends, and comprehensive market analytics right from your private dashboard." },
+               { n: "05", t: "Liquidate or Redeem", d: "Sell your holdings instantly back to the market for cash 24/7. Alternatively, accumulate enough weight and request insured physical delivery of minted bars directly to your door." }
+             ].map(s => (
+               <Card key={s.n} className="group relative overflow-hidden border-border/60 bg-background transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-gold">
+                 <div className="absolute right-4 top-4 text-5xl font-bold text-gold/10 transition-colors group-hover:text-gold/20">{s.n}</div>
+                 <CardContent className="relative p-8">
+                   <h3 className="mt-4 text-xl font-semibold text-foreground">{s.t}</h3>
+                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+                 </CardContent>
+               </Card>
+             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="px-4 py-20">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-card to-background p-12 text-center">
+          <div className="absolute inset-0 bg-mesh-luxury opacity-30" />
+          <div className="relative">
+            <h2 className="text-3xl font-bold">Start building your gold portfolio today</h2>
+            <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
+              Join thousands of investors securing their wealth with Amira Gold. Create your account in minutes.
+            </p>
+            <Button asChild size="lg" className="mt-8 rounded-full bg-gradient-gold text-gold-foreground shadow-gold hover:opacity-90">
+              <Link to="/auth">Open Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   );

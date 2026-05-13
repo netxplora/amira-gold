@@ -91,6 +91,75 @@ function BuyPage() {
         )}
       </section>
 
+      {/* Storage vs Delivery Comparison */}
+      <section className="border-t border-border/40 bg-card/30 py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-16 text-center">
+            <span className="text-xs font-semibold uppercase tracking-widest text-gold">Flexibility & Security</span>
+            <h2 className="mt-2 text-3xl font-bold md:text-4xl">Your wealth, on your terms</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              Whether you prefer the ultimate security of professional vaulting or the tangible reassurance of holding gold in your own hands, Amira Gold provides institutional-grade logistics for both.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card className="border-border/60 bg-background transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-gold">
+              <CardContent className="p-10">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-gold text-gold-foreground shadow-gold">
+                    <Vault className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-2xl font-bold">Allocated Vault Storage</h3>
+                </div>
+                <p className="mt-5 leading-relaxed text-muted-foreground">
+                  The choice for investors who want absolute security and immediate liquidity. Your physical gold is held under your direct legal title in independent, LBMA-approved high-security vaults located in Zurich, Dubai, Singapore, or London.
+                </p>
+                <ul className="mt-8 space-y-4">
+                  {[
+                    "First year of allocated storage is completely free.",
+                    "Fully insured against all risks by Lloyd's of London.",
+                    "Instantly liquidate and sell back to us at the live spot price.",
+                    "Subject to independent, third-party quarterly audits.",
+                    "Convert to physical delivery at any time."
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-gold" /> 
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-border/60 bg-background transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-gold">
+              <CardContent className="p-10">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-gold text-gold-foreground shadow-gold">
+                    <Truck className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-2xl font-bold">Insured Home Delivery</h3>
+                </div>
+                <p className="mt-5 leading-relaxed text-muted-foreground">
+                  The choice for purists who want to take physical possession. We ship your minted bars globally using the world's most trusted armored logistics networks, ensuring your assets reach your hands safely.
+                </p>
+                <ul className="mt-8 space-y-4">
+                  {[
+                    "Transported exclusively via Brinks, Malca-Amit, or Loomis.",
+                    "100% replacement insurance active during the entire transit.",
+                    "Real-time GPS tracking with strict signature-only receipt.",
+                    "Packaged in discreet, tamper-evident secure parcels.",
+                    "Customs clearance handled by our concierge team."
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-gold" /> 
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   );

@@ -69,6 +69,31 @@ function ContactPage() {
         </div>
       </section>
 
+      {/* Private Wealth & Concierge */}
+      <section className="border-t border-border/40 bg-card/30 py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="rounded-3xl border border-gold/40 bg-gradient-to-br from-card to-background p-10 shadow-gold md:p-14">
+            <div className="grid gap-10 md:grid-cols-[1fr_auto] md:items-center">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-widest text-gold">High Net Worth</span>
+                <h2 className="mt-2 text-2xl font-bold md:text-3xl">Private Wealth & Wholesale</h2>
+                <p className="mt-4 max-w-2xl text-muted-foreground">
+                  For institutional investors, family offices, and individuals purchasing in excess of $100,000, our Private Wealth division offers a dedicated relationship manager, bespoke procurement, and specialized secure transport logistics.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3">
+                <a href="mailto:privatewealth@amiragold.com" className="inline-flex items-center justify-center rounded-full bg-gradient-gold px-6 py-3 text-sm font-medium text-gold-foreground shadow-gold transition-opacity hover:opacity-90">
+                  <Mail className="mr-2 h-4 w-4" /> Email Private Wealth
+                </a>
+                <a href="tel:+97140000000" className="inline-flex items-center justify-center rounded-full border border-gold/30 bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-gold/10">
+                  <Phone className="mr-2 h-4 w-4 text-gold" /> Call VIP Desk
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   );

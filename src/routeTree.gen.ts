@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ProofOfReservesRouteImport } from './routes/proof-of-reserves'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as JewelryRouteImport } from './routes/jewelry'
 import { Route as InvestRouteImport } from './routes/invest'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -78,6 +79,11 @@ const ProofOfReservesRoute = ProofOfReservesRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JewelryRoute = JewelryRouteImport.update({
+  id: '/jewelry',
+  path: '/jewelry',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestRoute = InvestRouteImport.update({
@@ -353,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/insurance': typeof InsuranceRoute
   '/invest': typeof InvestRoute
+  '/jewelry': typeof JewelryRoute
   '/privacy': typeof PrivacyRoute
   '/proof-of-reserves': typeof ProofOfReservesRoute
   '/terms': typeof TermsRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/insurance': typeof InsuranceRoute
   '/invest': typeof InvestRoute
+  '/jewelry': typeof JewelryRoute
   '/privacy': typeof PrivacyRoute
   '/proof-of-reserves': typeof ProofOfReservesRoute
   '/terms': typeof TermsRoute
@@ -466,6 +474,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/insurance': typeof InsuranceRoute
   '/invest': typeof InvestRoute
+  '/jewelry': typeof JewelryRoute
   '/privacy': typeof PrivacyRoute
   '/proof-of-reserves': typeof ProofOfReservesRoute
   '/terms': typeof TermsRoute
@@ -525,6 +534,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/insurance'
     | '/invest'
+    | '/jewelry'
     | '/privacy'
     | '/proof-of-reserves'
     | '/terms'
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/insurance'
     | '/invest'
+    | '/jewelry'
     | '/privacy'
     | '/proof-of-reserves'
     | '/terms'
@@ -637,6 +648,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/insurance'
     | '/invest'
+    | '/jewelry'
     | '/privacy'
     | '/proof-of-reserves'
     | '/terms'
@@ -695,6 +707,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   InsuranceRoute: typeof InsuranceRoute
   InvestRoute: typeof InvestRoute
+  JewelryRoute: typeof JewelryRoute
   PrivacyRoute: typeof PrivacyRoute
   ProofOfReservesRoute: typeof ProofOfReservesRoute
   TermsRoute: typeof TermsRoute
@@ -721,6 +734,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jewelry': {
+      id: '/jewelry'
+      path: '/jewelry'
+      fullPath: '/jewelry'
+      preLoaderRoute: typeof JewelryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invest': {
@@ -1209,6 +1229,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   InsuranceRoute: InsuranceRoute,
   InvestRoute: InvestRoute,
+  JewelryRoute: JewelryRoute,
   PrivacyRoute: PrivacyRoute,
   ProofOfReservesRoute: ProofOfReservesRoute,
   TermsRoute: TermsRoute,

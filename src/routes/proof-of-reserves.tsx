@@ -145,6 +145,33 @@ function ProofPage() {
         </div>
       </section>
 
+      {/* Educational Section */}
+      <section className="border-b border-border/40 bg-card/30 py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="grid gap-10 md:grid-cols-3">
+            {[
+              {
+                title: "1:1 Physical Backing",
+                desc: "Every fraction of digital gold you hold is backed by actual, physical gold stored in our vaults. There is zero fractional reserve lending."
+              },
+              {
+                title: "Independent Verification",
+                desc: "We regularly invite external, third-party assayers and audit firms to physically count, weigh, and verify the purity of our holdings."
+              },
+              {
+                title: "Transparent Ledger",
+                desc: "Our records of customer holdings and vault capacities are synchronized and published, ensuring total liabilities never exceed total assets."
+              }
+            ].map((item, i) => (
+              <div key={i} className="text-center md:text-left">
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-5xl px-4 py-16">
         <Card className="border-gold/40 bg-gradient-to-br from-card to-background shadow-gold">
           <CardContent className="grid gap-6 p-10 md:grid-cols-3 md:items-center">

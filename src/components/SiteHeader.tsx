@@ -9,6 +9,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const navItems = [
   { to: "/buy", label: "Buy Gold" },
   { to: "/invest", label: "Invest" },
+  { to: "/jewelry", label: "Jewelry" },
   { to: "/proof-of-reserves", label: "Reserves" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },

@@ -184,13 +184,19 @@
   * {
     border-color: var(--color-border);
   }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, .font-display {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
     font-family: "Poppins", "Inter", ui-sans-serif, system-ui, sans-serif;
     letter-spacing: -0.01em;
   }
@@ -203,64 +209,85 @@
     background-clip: text;
     color: transparent;
   }
+
   .bg-gradient-gold {
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-glow) 100%);
   }
+
   .bg-gradient-charcoal {
     background: radial-gradient(1200px 600px at 50% 0%, color-mix(in oklab, var(--background) 92%, var(--foreground) 8%) 0%, var(--background) 60%);
   }
+
   .shadow-gold {
     box-shadow: 0 10px 40px -10px color-mix(in oklab, var(--gold) 35%, transparent);
   }
+
   .shadow-silver {
     box-shadow: 0 10px 40px -12px color-mix(in oklab, var(--silver) 30%, transparent);
   }
+
   .shadow-ruby {
     box-shadow: 0 10px 40px -12px color-mix(in oklab, var(--ruby) 35%, transparent);
   }
+
   .text-gradient-silver {
     background: linear-gradient(135deg, oklch(0.92 0.005 250) 0%, oklch(0.72 0.012 250) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+
   .bg-gradient-silver {
     background: linear-gradient(135deg, oklch(0.92 0.005 250) 0%, oklch(0.72 0.012 250) 100%);
   }
+
   .bg-gradient-ruby {
     background: linear-gradient(135deg, var(--ruby) 0%, oklch(0.45 0.18 22) 100%);
   }
+
   .bg-gradient-emerald {
     background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-glow) 100%);
   }
+
   .text-gradient-emerald {
     background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-glow) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+
   .shadow-emerald {
     box-shadow: 0 10px 40px -12px color-mix(in oklab, var(--emerald) 35%, transparent);
   }
+
   .bg-mesh-luxury {
     background-image:
       radial-gradient(800px 400px at 80% -10%, color-mix(in oklab, var(--gold) 18%, transparent), transparent 60%),
       radial-gradient(700px 400px at -10% 110%, color-mix(in oklab, var(--ruby) 14%, transparent), transparent 60%),
       linear-gradient(180deg, color-mix(in oklab, var(--background) 96%, var(--foreground) 4%), var(--background));
   }
+
   .border-gradient-gold {
     border-image: linear-gradient(135deg, var(--gold), var(--gold-glow)) 1;
   }
+
   .ring-gold-soft {
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--gold) 30%, transparent), 0 20px 50px -25px color-mix(in oklab, var(--gold) 40%, transparent);
   }
+
   .animate-shimmer {
     background: linear-gradient(110deg, transparent 30%, color-mix(in oklab, var(--gold) 25%, transparent) 50%, transparent 70%);
     background-size: 200% 100%;
     animation: shimmer 2.6s linear infinite;
   }
+
   @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
   }
 }

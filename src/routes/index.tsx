@@ -131,7 +131,7 @@ function Hero() {
 
           {/* Right Hero Visual Card */}
           <div className="md:col-span-5 animate-slide-up">
-            <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-card">
+            <div className="card-3d overflow-hidden rounded-2xl border border-border/80 bg-card shadow-3d">
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/40">
                 <img
                   src={heroGold}
@@ -345,10 +345,10 @@ function BullionCatalogSection() {
   ];
 
   const COINS = [
-    { name: "1 oz American Gold Eagle", grams: 31.1035, purity: "916.7 (22K)", origin: "United States Mint" },
-    { name: "1 oz Canadian Maple Leaf", grams: 31.1035, purity: "999.9 (24K)", origin: "Royal Canadian Mint" },
-    { name: "1 oz British Britannia", grams: 31.1035, purity: "999.9 (24K)", origin: "The Royal Mint UK" },
-    { name: "1 oz South African Krugerrand", grams: 31.1035, purity: "916.7 (22K)", origin: "South African Mint" },
+    { name: "1 oz American Eagle", grams: 31.1035, purity: "916.7 (22K)", origin: "United States Mint" },
+    { name: "1 oz Maple Leaf", grams: 31.1035, purity: "999.9 (24K)", origin: "Royal Canadian Mint" },
+    { name: "1 oz Britannia", grams: 31.1035, purity: "999.9 (24K)", origin: "The Royal Mint UK" },
+    { name: "1 oz Krugerrand", grams: 31.1035, purity: "916.7 (22K)", origin: "South African Mint" },
   ];
 
   return (
@@ -374,27 +374,27 @@ function BullionCatalogSection() {
           </TabsList>
 
           <TabsContent value="bars">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {BARS.map((b) => {
                 const total = b.grams * pricePerGram;
                 return (
-                  <Card key={b.name} className="border-border/70 bg-card shadow-card p-5 transition-all duration-200 hover:border-primary/40 hover:shadow-card-hover flex flex-col justify-between">
+                  <Card key={b.name} className="card-3d border-border/70 bg-card p-3.5 sm:p-5 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                          {b.purity} Fine Gold
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary sm:text-[10px] sm:px-2">
+                          {b.purity}
                         </span>
-                        <span className="text-[11px] text-muted-foreground">{b.grams}g</span>
+                        <span className="text-[10px] font-medium text-muted-foreground sm:text-[11px]">{b.grams}g</span>
                       </div>
-                      <h3 className="font-display mt-3 text-base font-bold text-foreground">{b.name}</h3>
-                      <p className="mt-1 text-xs text-muted-foreground">Refinery: {b.refiner}</p>
+                      <h3 className="font-display mt-2.5 text-xs font-bold text-foreground sm:text-base">{b.name}</h3>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1 sm:text-xs sm:mt-1">{b.refiner}</p>
                     </div>
-                    <div className="mt-5 border-t border-border/50 pt-4 flex items-center justify-between">
+                    <div className="mt-4 border-t border-border/50 pt-3 flex flex-col gap-2 sm:mt-5 sm:pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <div className="text-[10px] uppercase text-muted-foreground">Live Rate</div>
-                        <div className="font-display text-base font-bold text-primary">{formatUSD(total)}</div>
+                        <div className="text-[9px] uppercase tracking-wider text-muted-foreground sm:text-[10px]">Live Rate</div>
+                        <div className="font-display text-xs font-bold text-primary sm:text-base">{formatUSD(total)}</div>
                       </div>
-                      <Button asChild size="sm" className="shadow-xs">
+                      <Button asChild size="sm" className="h-7 text-xs sm:h-8 shadow-xs w-full sm:w-auto font-semibold">
                         <Link to="/buy">Buy</Link>
                       </Button>
                     </div>
@@ -405,27 +405,27 @@ function BullionCatalogSection() {
           </TabsContent>
 
           <TabsContent value="coins">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {COINS.map((c) => {
                 const total = c.grams * pricePerGram;
                 return (
-                  <Card key={c.name} className="border-border/70 bg-card shadow-card p-5 transition-all duration-200 hover:border-primary/40 hover:shadow-card-hover flex flex-col justify-between">
+                  <Card key={c.name} className="card-3d border-border/70 bg-card p-3.5 sm:p-5 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald/20 bg-emerald/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="inline-flex items-center rounded-full border border-emerald/20 bg-emerald/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-500 sm:text-[10px] sm:px-2">
                           {c.purity}
                         </span>
-                        <span className="text-[11px] text-muted-foreground">1 oz ({c.grams.toFixed(1)}g)</span>
+                        <span className="text-[10px] font-medium text-muted-foreground sm:text-[11px]">1 oz</span>
                       </div>
-                      <h3 className="font-display mt-3 text-base font-bold text-foreground">{c.name}</h3>
-                      <p className="mt-1 text-xs text-muted-foreground">Issuer: {c.origin}</p>
+                      <h3 className="font-display mt-2.5 text-xs font-bold text-foreground sm:text-base">{c.name}</h3>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1 sm:text-xs sm:mt-1">{c.origin}</p>
                     </div>
-                    <div className="mt-5 border-t border-border/50 pt-4 flex items-center justify-between">
+                    <div className="mt-4 border-t border-border/50 pt-3 flex flex-col gap-2 sm:mt-5 sm:pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <div className="text-[10px] uppercase text-muted-foreground">Live Rate</div>
-                        <div className="font-display text-base font-bold text-primary">{formatUSD(total)}</div>
+                        <div className="text-[9px] uppercase tracking-wider text-muted-foreground sm:text-[10px]">Live Rate</div>
+                        <div className="font-display text-xs font-bold text-primary sm:text-base">{formatUSD(total)}</div>
                       </div>
-                      <Button asChild size="sm" className="shadow-xs">
+                      <Button asChild size="sm" className="h-7 text-xs sm:h-8 shadow-xs w-full sm:w-auto font-semibold">
                         <Link to="/buy">Buy</Link>
                       </Button>
                     </div>
@@ -458,7 +458,7 @@ function VaultsStrip() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {VAULT_LOCATIONS.map((v) => (
-          <Card key={v.code} className="group overflow-hidden border-border/70 bg-card/90 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card-hover p-0">
+          <Card key={v.code} className="card-3d group overflow-hidden border-border/70 bg-card/90 shadow-card p-0">
             <div className="relative h-40 w-full overflow-hidden bg-muted/40">
               <img
                 src={VAULT_IMAGES[v.code] ?? vaultInterior}
@@ -564,7 +564,7 @@ function SecurityArchitectureSection() {
         {PILLARS.map((p) => {
           const Icon = p.icon;
           return (
-            <Card key={p.title} className="border-border/70 bg-card/90 shadow-card p-5 transition-all hover:border-primary/40">
+            <Card key={p.title} className="card-3d border-border/70 bg-card/90 shadow-card p-5">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" />
               </div>
@@ -596,7 +596,7 @@ function HowItWorks() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((s) => (
-            <Card key={s.n} className="border-border/70 bg-card shadow-card p-5 transition-all hover:border-primary/40">
+            <Card key={s.n} className="card-3d border-border/70 bg-card shadow-card p-5">
               <div className="text-xs font-bold uppercase tracking-wider text-primary">Step {s.n}</div>
               <h3 className="font-display mt-2 font-semibold text-sm sm:text-base text-foreground">{s.t}</h3>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{s.d}</p>

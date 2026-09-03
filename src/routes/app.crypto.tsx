@@ -69,7 +69,7 @@ function CryptoPage() {
   };
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [user]);
 
-  // Realtime: react to admin approval/rejection of this user's deposits
+  // Realtime: react to approval/rejection
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -82,7 +82,7 @@ function CryptoPage() {
 
   const selected = addrs.find((x) => `${x.asset}|${x.network}` === selAsset);
 
-  // Crude crypto-equivalent estimator (purely informational; admin verifies on-chain)
+  // Crude crypto-equivalent estimator
   const cryptoEquivalent = useMemo(() => {
     const u = Number(usd);
     if (!u || !selected) return "";
@@ -92,11 +92,11 @@ function CryptoPage() {
     return (u / px).toFixed(selected.asset.toUpperCase() === "BTC" ? 6 : selected.asset.toUpperCase() === "ETH" ? 5 : 2);
   }, [usd, selected]);
 
-  const copy = (v: string) => { navigator.clipboard.writeText(v); toast.success("Copied"); };
+  const copy = (v: string) => { navigator.clipboard.writeText(v); toast.success("Copied to clipboard"); };
 
   const goToStep2 = () => {
     if (!selected) return toast.error("Select a cryptocurrency first");
-    if (!(Number(usd) > 0)) return toast.error("Enter the USD amount you'll deposit");
+    if (!(Number(usd) > 0)) return toast.error("Enter the USD amount you plan to deposit");
     setAmount(cryptoEquivalent);
     setStep(2);
   };
@@ -106,9 +106,9 @@ function CryptoPage() {
     const u = Number(usd);
     const a = Number(amount);
     if (!(u > 0)) return toast.error("Enter a valid USD amount");
-    if (!(a > 0)) return toast.error("Enter the crypto amount you sent");
-    if (!tx.trim() && !senderAddr.trim()) return toast.error("Provide either the transaction hash or sender wallet address");
-    if (tx.trim() && tx.trim().length < 10) return toast.error("Transaction hash looks too short");
+    if (!(a > 0)) return toast.error("Enter the cryptocurrency amount sent");
+    if (!tx.trim() && !senderAddr.trim()) return toast.error("Provide either the transaction hash or sender address");
+    if (tx.trim() && tx.trim().length < 10) return toast.error("Transaction hash is invalid or too short");
 
     setSubmitting(true);
     const { error } = await supabase.from("crypto_deposits").insert({
@@ -122,23 +122,23 @@ function CryptoPage() {
     });
     setSubmitting(false);
     if (error) {
-      if (error.code === "23505") return toast.error("This transaction has already been submitted");
+      if (error.code === "23505") return toast.error("This transaction has already been registered");
       return toast.error(error.message);
     }
     setUsd(""); setAmount(""); setTx(""); setSenderAddr(""); setStep(1);
-    toast.success("Deposit submitted — awaiting admin verification");
+    toast.success("Deposit submitted for ledger verification");
     refresh();
   };
 
   const submitWithdraw = async () => {
     if (!user) return;
-    if (!verified) return toast.error("Account verification required before withdrawal");
+    if (!verified) return toast.error("Identity verification required before withdrawals can be processed");
     const u = Number(wUsd);
-    if (!(u > 0) || !wAddr.trim()) return toast.error("Fill amount and destination address");
-    if (u > balance) return toast.error("Insufficient wallet balance");
+    if (!(u > 0) || !wAddr.trim()) return toast.error("Provide a valid withdrawal amount and destination address");
+    if (u > balance) return toast.error("Insufficient available wallet balance");
 
     try {
-      const { data, error } = await supabase.rpc("request_crypto_withdrawal" as never, {
+      const { error } = await supabase.rpc("request_crypto_withdrawal" as never, {
         _asset: wAsset,
         _network: wNetwork,
         _amount_usd: u,
@@ -148,10 +148,10 @@ function CryptoPage() {
       if (error) throw error;
 
       setWUsd(""); setWAddr("");
-      toast.success("Withdrawal request submitted");
+      toast.success("Withdrawal request submitted for review");
       refresh();
     } catch (err: any) {
-      toast.error(err.message || "Withdrawal failed");
+      toast.error(err.message || "Withdrawal request failed");
     }
   };
 
@@ -161,175 +161,188 @@ function CryptoPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Crypto"
-        title="Deposits & withdrawals"
-        subtitle="Fund your wallet with BTC, ETH or USDT — admin-verified for security."
+        eyebrow="Funding Rail"
+        title="Digital Asset Transfers"
+        subtitle="Fund your account wallet with BTC, ETH, or USDT for instant bullion settlement."
         icon={<Bitcoin className="h-6 w-6" />}
       />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatTile label="Wallet Balance" value={formatUSD(balance)} hint="Available to invest" accent="gold" />
-        <StatTile label="Pending Deposits" value={pendingDeps} hint="Awaiting verification" accent="silver" />
-        <StatTile label="Pending Withdrawals" value={pendingWds} hint="Being processed" accent="ruby" />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatTile label="Cash Balance" value={formatUSD(balance)} hint="Available for bullion purchases" accent="gold" />
+        <StatTile label="Pending Deposits" value={pendingDeps} hint="Awaiting settlement" accent="silver" />
+        <StatTile label="Pending Withdrawals" value={pendingWds} hint="Under review" accent="ruby" />
       </div>
 
-      <Tabs defaultValue="deposit">
-        <TabsList className="bg-card/60">
-          <TabsTrigger value="deposit"><ArrowDownToLine className="mr-2 h-4 w-4" />Deposit</TabsTrigger>
-          <TabsTrigger value="withdraw"><ArrowUpFromLine className="mr-2 h-4 w-4" />Withdraw</TabsTrigger>
+      <Tabs defaultValue="deposit" className="space-y-4">
+        <TabsList className="bg-muted/40 border border-border/70">
+          <TabsTrigger value="deposit" className="text-xs font-semibold"><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> Deposit</TabsTrigger>
+          <TabsTrigger value="withdraw" className="text-xs font-semibold"><ArrowUpFromLine className="mr-1.5 h-3.5 w-3.5" /> Withdraw</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deposit" className="space-y-4">
           <StepIndicator step={step} />
 
           {step === 1 && (
-            <Card className="border-border/60 bg-card/80">
-              <CardContent className="space-y-5 p-6">
-                <div className="flex items-center justify-between gap-4">
+            <Card className="border-border/70 bg-card shadow-card">
+              <CardContent className="space-y-5 p-5 sm:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-semibold">Step 1 — Choose what you'll deposit</h3>
-                    <p className="text-xs text-muted-foreground">Select a cryptocurrency and how much (in USD) you plan to send.</p>
+                    <h3 className="font-display text-base font-semibold text-foreground">Step 1 — Asset & Amount Selection</h3>
+                    <p className="text-xs text-muted-foreground">Select the asset you wish to deposit and enter the equivalent USD value.</p>
                   </div>
                   <Button
                     size="sm"
+                    variant="outline"
                     onClick={() => setBuyOpen(true)}
                     disabled={!selected}
-                    className="bg-gradient-gold text-gold-foreground shadow-gold transition-transform hover:scale-[1.02] hover:opacity-95 active:scale-100"
+                    className="border-border/70 font-semibold"
                   >
-                    <ShoppingBag className="mr-1.5 h-4 w-4" /> Buy crypto
+                    <ShoppingBag className="mr-1.5 h-3.5 w-3.5" /> Buy with Card
                   </Button>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div>
-                    <Label>Cryptocurrency *</Label>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Asset & Network</Label>
                     <Select value={selAsset} onValueChange={setSelAsset}>
-                      <SelectTrigger><SelectValue placeholder="Choose asset" /></SelectTrigger>
+                      <SelectTrigger className="h-9 text-xs border-border/70"><SelectValue placeholder="Select digital asset" /></SelectTrigger>
                       <SelectContent>
                         {addrs.map((a) => (
                           <SelectItem key={a.id} value={`${a.asset}|${a.network}`}>{a.asset} — {a.network}</SelectItem>
                         ))}
-                        {addrs.length === 0 && <SelectItem disabled value="none">No assets configured</SelectItem>}
+                        {addrs.length === 0 && <SelectItem disabled value="none">No deposit assets configured</SelectItem>}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <Label>Amount (USD) *</Label>
-                    <Input type="number" inputMode="decimal" value={usd} onChange={(e) => setUsd(e.target.value)} placeholder="500" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Deposit Amount (USD)</Label>
+                    <Input type="number" inputMode="decimal" value={usd} onChange={(e) => setUsd(e.target.value)} placeholder="500" className="h-9 text-xs border-border/70" />
                     {cryptoEquivalent && selected && (
-                      <p className="mt-1 text-[11px] text-muted-foreground">
-                        ≈ <span className="font-mono text-gold">{cryptoEquivalent} {selected.asset}</span> (estimate, verified on-chain)
+                      <p className="text-[11px] text-muted-foreground">
+                        Est. volume: <span className="font-mono font-medium text-foreground">{cryptoEquivalent} {selected.asset}</span>
                       </p>
                     )}
                   </div>
                 </div>
 
-                <Button onClick={goToStep2} className="w-full bg-gradient-gold text-gold-foreground hover:opacity-90">
-                  Deposit <ChevronRight className="ml-1 h-4 w-4" />
+                <Button onClick={goToStep2} className="w-full font-semibold shadow-xs">
+                  Continue to Address <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
           )}
 
           {step === 2 && selected && (
-            <Card className="border-border/60 bg-card/80">
-              <CardContent className="space-y-5 p-6">
-                <div className="flex items-center justify-between">
+            <Card className="border-border/70 bg-card shadow-card">
+              <CardContent className="space-y-5 p-5 sm:p-6">
+                <div className="flex items-center justify-between border-b border-border/50 pb-3">
                   <div>
-                    <h3 className="font-semibold">Step 2 — Send funds & confirm</h3>
-                    <p className="text-xs text-muted-foreground">Send to the address below, then submit the transaction details.</p>
+                    <h3 className="font-display text-base font-semibold text-foreground">Step 2 — Transfer & Confirmation</h3>
+                    <p className="text-xs text-muted-foreground">Transfer to the segregated address below, then record the transaction reference.</p>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setStep(1)}>
-                    <ArrowLeft className="mr-1 h-4 w-4" /> Back
+                  <Button size="sm" variant="ghost" onClick={() => setStep(1)} className="text-xs">
+                    <ArrowLeft className="mr-1 h-3.5 w-3.5" /> Back
                   </Button>
                 </div>
 
                 {/* Summary */}
-                <div className="grid gap-3 rounded-xl border border-border/60 bg-background/40 p-4 sm:grid-cols-3">
-                  <Summary label="Requested" value={formatUSD(Number(usd))} />
-                  <Summary label="≈ Crypto" value={`${cryptoEquivalent || amount} ${selected.asset}`} />
-                  <Summary label="Network" value={selected.network} accent />
+                <div className="grid gap-3 rounded-xl border border-border/60 bg-muted/20 p-4 sm:grid-cols-3">
+                  <Summary label="USD Value" value={formatUSD(Number(usd))} />
+                  <Summary label="Asset Equivalent" value={`${cryptoEquivalent || amount} ${selected.asset}`} />
+                  <Summary label="Transfer Network" value={selected.network} accent />
                 </div>
 
                 {/* QR + address */}
-                <div className="grid gap-4 rounded-xl border border-gold/30 bg-gradient-to-br from-gold/10 to-transparent p-5 md:grid-cols-[auto,1fr]">
-                  <div className="flex justify-center md:justify-start">
-                    <QRCode value={selected.address} size={160} />
+                <div className="grid gap-4 rounded-xl border border-border/70 bg-card p-5 sm:grid-cols-[auto,1fr] sm:items-center">
+                  <div className="flex justify-center p-2 rounded-lg bg-white">
+                    <QRCode value={selected.address} size={130} />
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <div className="text-xs uppercase tracking-widest text-gold">Send to this address</div>
-                      <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400">
-                        <ShieldCheck className="h-3 w-3" /> Verified
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Depository Deposit Address</div>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                        <ShieldCheck className="h-3.5 w-3.5" /> Verified Rail
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 break-all rounded-lg bg-background/60 p-3 font-mono text-xs">{selected.address}</code>
-                      <Button size="icon" variant="ghost" onClick={() => copy(selected.address)} className="hover:bg-gold/10 hover:text-gold">
+                      <code className="flex-1 break-all rounded-lg border border-border/60 bg-muted/30 p-2.5 font-mono text-xs">{selected.address}</code>
+                      <Button size="icon" variant="outline" onClick={() => copy(selected.address)} className="h-9 w-9 shrink-0 border-border/70">
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
                     {selected.memo && (
-                      <p className="text-xs text-muted-foreground">Memo: <code className="text-gold">{selected.memo}</code></p>
+                      <p className="text-xs text-muted-foreground">Memo / Tag: <code className="font-bold text-foreground">{selected.memo}</code></p>
                     )}
-                    <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 text-[11px] text-amber-300">
+                    <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5 text-[11px] text-amber-700 dark:text-amber-400">
                       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                       <span>
-                        Send only <strong>{selected.asset}</strong> via the <strong>{selected.network}</strong> network.
-                        Sending via the wrong network may result in loss of funds.
+                        Transfer only <strong>{selected.asset}</strong> on the <strong>{selected.network}</strong> network. Other assets will be permanently unrecoverable.
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* User input */}
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div>
-                    <Label>Crypto amount sent *</Label>
-                    <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.008" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Exact Amount Sent *</Label>
+                    <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.008" className="h-9 text-xs border-border/70" />
                   </div>
-                  <div>
-                    <Label>Transaction hash</Label>
-                    <Input value={tx} onChange={(e) => setTx(e.target.value)} placeholder="0x… or hash" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Transaction Hash / TxID</Label>
+                    <Input value={tx} onChange={(e) => setTx(e.target.value)} placeholder="0x… or hash" className="h-9 text-xs border-border/70" />
                   </div>
-                  <div className="md:col-span-2">
-                    <Label>…or sender wallet address</Label>
-                    <Input value={senderAddr} onChange={(e) => setSenderAddr(e.target.value)} placeholder="The address you sent from" />
-                    <p className="mt-1 text-[11px] text-muted-foreground">Provide at least one — transaction hash is preferred.</p>
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <Label className="text-xs font-medium">Sender Wallet Address (Alternative)</Label>
+                    <Input value={senderAddr} onChange={(e) => setSenderAddr(e.target.value)} placeholder="The wallet address you sent from" className="h-9 text-xs border-border/70" />
+                    <p className="text-[11px] text-muted-foreground">Providing the transaction hash ensures expedited verification.</p>
                   </div>
                 </div>
 
-                <Button onClick={submitDeposit} disabled={submitting} className="w-full bg-gradient-gold text-gold-foreground hover:opacity-90">
-                  {submitting ? "Submitting…" : <>Confirm deposit <CheckCircle2 className="ml-2 h-4 w-4" /></>}
+                <Button onClick={submitDeposit} disabled={submitting} className="w-full font-semibold shadow-xs">
+                  {submitting ? "Registering…" : <>Confirm &amp; Register Deposit <CheckCircle2 className="ml-1.5 h-4 w-4" /></>}
                 </Button>
               </CardContent>
             </Card>
           )}
 
           {/* History */}
-          <Card className="border-border/60 bg-card/80">
+          <Card className="border-border/70 bg-card shadow-card">
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead><TableHead>Asset</TableHead><TableHead>Amount</TableHead>
-                    <TableHead>USD</TableHead><TableHead>Reference</TableHead><TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {deps.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground">No deposits yet</TableCell></TableRow>}
-                  {deps.map((d) => (
-                    <TableRow key={d.id}>
-                      <TableCell className="text-xs">{new Date(d.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>{d.asset}</TableCell>
-                      <TableCell>{d.amount}</TableCell>
-                      <TableCell className="font-semibold text-gold">{formatUSD(d.amount_usd)}</TableCell>
-                      <TableCell className="font-mono text-xs">{d.tx_hash.slice(0, 12)}…</TableCell>
-                      <TableCell><StatusBadge s={d.status} /></TableCell>
+              <div className="flex items-center justify-between border-b border-border/50 px-5 py-3.5">
+                <h3 className="font-display text-sm font-semibold text-foreground">Deposit Register</h3>
+                <span className="text-xs text-muted-foreground">{deps.length} entries</span>
+              </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border/50 hover:bg-transparent">
+                      <TableHead className="text-xs">Date</TableHead>
+                      <TableHead className="text-xs">Asset</TableHead>
+                      <TableHead className="text-xs">Amount</TableHead>
+                      <TableHead className="text-xs">USD Credit</TableHead>
+                      <TableHead className="text-xs">Tx Reference</TableHead>
+                      <TableHead className="text-right text-xs">Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {deps.length === 0 ? (
+                      <TableRow><TableCell colSpan={6} className="py-8 text-center text-xs text-muted-foreground">No deposits recorded yet</TableCell></TableRow>
+                    ) : (
+                      deps.map((d) => (
+                        <TableRow key={d.id} className="border-border/40 hover:bg-muted/30">
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(d.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-xs font-medium">{d.asset}</TableCell>
+                          <TableCell className="font-mono text-xs">{d.amount}</TableCell>
+                          <TableCell className="font-display font-semibold text-xs text-foreground">{formatUSD(d.amount_usd)}</TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">{d.tx_hash.slice(0, 12)}…</TableCell>
+                          <TableCell className="text-right"><StatusBadge s={d.status} /></TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
 
@@ -346,66 +359,88 @@ function CryptoPage() {
 
         <TabsContent value="withdraw" className="space-y-4">
           {!verified && (
-            <Card className="border-amber-500/40 bg-amber-500/5">
+            <Card className="border-amber-500/30 bg-amber-500/5">
               <CardContent className="flex flex-col items-start gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex gap-3">
-                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
                   <div>
-                    <div className="font-semibold text-amber-200">Account verification required before withdrawal</div>
-                    <p className="text-xs text-amber-100/80">For your safety and to comply with AML rules, we need to verify your identity before processing any withdrawal.</p>
+                    <div className="font-display text-sm font-semibold text-foreground">Identity Verification Required for Withdrawals</div>
+                    <p className="text-xs text-muted-foreground">In accordance with AML regulations, client identity must be confirmed before capital can be withdrawn.</p>
                   </div>
                 </div>
-                <Button asChild className="bg-gradient-gold text-gold-foreground hover:opacity-90">
-                  <Link to="/app/kyc"><ShieldCheck className="mr-2 h-4 w-4" /> Verify Account</Link>
+                <Button asChild size="sm" className="shadow-xs font-semibold shrink-0">
+                  <Link to="/app/kyc"><ShieldCheck className="mr-1.5 h-3.5 w-3.5" /> Verify Identity</Link>
                 </Button>
               </CardContent>
             </Card>
           )}
 
-          <Card className={`border-border/60 bg-card/80 ${!verified ? "pointer-events-none opacity-50" : ""}`}>
-            <CardContent className="space-y-4 p-6">
-              <div className="grid gap-3 md:grid-cols-2">
-                <div><Label>Asset</Label>
+          <Card className={`border-border/70 bg-card shadow-card ${!verified ? "pointer-events-none opacity-50" : ""}`}>
+            <CardContent className="space-y-4 p-5 sm:p-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Digital Asset</Label>
                   <Select value={wAsset} onValueChange={setWAsset}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs border-border/70"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="BTC">BTC</SelectItem>
-                      <SelectItem value="ETH">ETH</SelectItem>
-                      <SelectItem value="USDT">USDT</SelectItem>
+                      <SelectItem value="BTC">BTC — Bitcoin</SelectItem>
+                      <SelectItem value="ETH">ETH — Ethereum</SelectItem>
+                      <SelectItem value="USDT">USDT — Tether</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label>Network</Label><Input value={wNetwork} onChange={(e) => setWNetwork(e.target.value)} /></div>
-                <div><Label>Amount (USD)</Label><Input type="number" value={wUsd} onChange={(e) => setWUsd(e.target.value)} /></div>
-                <div><Label>Destination address</Label><Input value={wAddr} onChange={(e) => setWAddr(e.target.value)} /></div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Network Protocol</Label>
+                  <Input value={wNetwork} onChange={(e) => setWNetwork(e.target.value)} className="h-9 text-xs border-border/70" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Amount to Withdraw (USD)</Label>
+                  <Input type="number" value={wUsd} onChange={(e) => setWUsd(e.target.value)} placeholder="0.00" className="h-9 text-xs border-border/70" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Destination Wallet Address</Label>
+                  <Input value={wAddr} onChange={(e) => setWAddr(e.target.value)} placeholder="0x… or recipient address" className="h-9 text-xs border-border/70" />
+                </div>
               </div>
-              <Button onClick={submitWithdraw} className="bg-gradient-gold text-gold-foreground hover:opacity-90">Request withdrawal</Button>
-              <p className="text-[11px] text-muted-foreground">Withdrawals are reviewed manually for your safety. Typically processed within a few hours.</p>
+              <Button onClick={submitWithdraw} className="font-semibold shadow-xs">Submit Withdrawal Request</Button>
+              <p className="text-[11px] text-muted-foreground">Withdrawal requests undergo compliance checks and are dispatched during business settlement windows.</p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-card/80">
+          <Card className="border-border/70 bg-card shadow-card">
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead><TableHead>Asset</TableHead><TableHead>USD</TableHead>
-                    <TableHead>To</TableHead><TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {wds.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-sm text-muted-foreground">No withdrawals yet</TableCell></TableRow>}
-                  {wds.map((w) => (
-                    <TableRow key={w.id}>
-                      <TableCell className="text-xs">{new Date(w.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>{w.asset}</TableCell>
-                      <TableCell className="font-semibold text-gold">{formatUSD(w.amount_usd)}</TableCell>
-                      <TableCell className="font-mono text-xs">{w.to_address.slice(0, 10)}…</TableCell>
-                      <TableCell><StatusBadge s={w.status} /></TableCell>
+              <div className="flex items-center justify-between border-b border-border/50 px-5 py-3.5">
+                <h3 className="font-display text-sm font-semibold text-foreground">Withdrawal History</h3>
+                <span className="text-xs text-muted-foreground">{wds.length} entries</span>
+              </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border/50 hover:bg-transparent">
+                      <TableHead className="text-xs">Date</TableHead>
+                      <TableHead className="text-xs">Asset</TableHead>
+                      <TableHead className="text-xs">USD Debit</TableHead>
+                      <TableHead className="text-xs">Destination</TableHead>
+                      <TableHead className="text-right text-xs">Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {wds.length === 0 ? (
+                      <TableRow><TableCell colSpan={5} className="py-8 text-center text-xs text-muted-foreground">No withdrawals recorded</TableCell></TableRow>
+                    ) : (
+                      wds.map((w) => (
+                        <TableRow key={w.id} className="border-border/40 hover:bg-muted/30">
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(w.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-xs font-medium">{w.asset}</TableCell>
+                          <TableCell className="font-display font-semibold text-xs text-foreground">{formatUSD(w.amount_usd)}</TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">{w.to_address.slice(0, 12)}…</TableCell>
+                          <TableCell className="text-right"><StatusBadge s={w.status} /></TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -417,8 +452,8 @@ function CryptoPage() {
 function Summary({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <div className={`mt-1 font-semibold ${accent ? "text-emerald-400" : "text-foreground"}`}>{value}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`mt-0.5 font-display text-sm font-semibold ${accent ? "text-primary" : "text-foreground"}`}>{value}</div>
     </div>
   );
 }
@@ -426,17 +461,17 @@ function Summary({ label, value, accent }: { label: string; value: string; accen
 function StepIndicator({ step }: { step: 1 | 2 }) {
   return (
     <div className="flex items-center gap-3 text-xs">
-      <Pill active={step === 1} done={step > 1} n={1} label="Initiate" />
+      <Pill active={step === 1} done={step > 1} n={1} label="Select Asset" />
       <div className="h-px flex-1 bg-border/60" />
-      <Pill active={step === 2} done={false} n={2} label="Confirm & send" />
+      <Pill active={step === 2} done={false} n={2} label="Confirm & Transfer" />
     </div>
   );
 }
 
 function Pill({ n, label, active, done }: { n: number; label: string; active: boolean; done: boolean }) {
   return (
-    <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 ${active ? "border-gold/50 bg-gold/10 text-gold" : done ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400" : "border-border/60 bg-card/40 text-muted-foreground"}`}>
-      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${active ? "bg-gold text-gold-foreground" : done ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"}`}>{done ? "✓" : n}</span>
+    <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${active ? "border-primary/40 bg-primary/10 text-primary" : done ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border/70 bg-card text-muted-foreground"}`}>
+      <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${active ? "bg-primary text-primary-foreground" : done ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"}`}>{done ? "✓" : n}</span>
       {label}
     </div>
   );
@@ -444,11 +479,11 @@ function Pill({ n, label, active, done }: { n: number; label: string; active: bo
 
 function StatusBadge({ s }: { s: string }) {
   const map: Record<string, string> = {
-    pending: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    processing: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-    approved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    sent: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    rejected: "bg-ruby/15 text-ruby border-ruby/40",
+    pending: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    processing: "border-primary/30 bg-primary/10 text-primary",
+    approved: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    sent: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    rejected: "border-destructive/30 bg-destructive/10 text-destructive",
   };
-  return <Badge className={map[s] ?? ""} variant="outline">{s}</Badge>;
+  return <Badge className={`capitalize font-medium text-[11px] ${map[s] ?? ""}`} variant="outline">{s}</Badge>;
 }

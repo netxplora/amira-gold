@@ -446,7 +446,7 @@ function OverviewStat({
   icon: Icon, label, value, sub,
 }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; sub?: string }) {
   return (
-    <Card className="border-border/70 bg-card shadow-card transition-all duration-200 hover:border-primary/40">
+    <Card className="card-3d border-border/70 bg-card shadow-card">
       <CardContent className="p-4 sm:p-5">
         <div className="flex items-start gap-3.5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary shadow-2xs">
@@ -467,8 +467,8 @@ function QuickAction({
   to, icon: Icon, label, desc,
 }: { to: "/app/buy" | "/app/invest" | "/app/certificates"; icon: React.ComponentType<{ className?: string }>; label: string; desc?: string }) {
   return (
-    <Link to={to} className="group flex items-start gap-3.5 rounded-xl border border-border/70 bg-card p-4 shadow-card transition-all duration-200 hover:border-primary/40 hover:shadow-card-hover active:scale-[0.99]">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs transition-transform duration-200 group-hover:scale-105">
+    <Link to={to} className="card-3d group flex items-start gap-3.5 rounded-xl border border-border/70 bg-card p-4 shadow-card active:scale-[0.98]">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs transition-transform duration-200 group-hover:scale-110">
         <Icon className="h-4 w-4" />
       </div>
       <div>

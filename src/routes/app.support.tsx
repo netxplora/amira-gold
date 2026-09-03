@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, MessageCircle, Sparkles, Headphones, Clock, Check, CheckCheck, Paperclip } from "lucide-react";
+import { Send, Headphones, Clock, Check, CheckCheck, Paperclip, Shield, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { SupportTicket, SupportMessage } from "@/lib/support/types";
@@ -24,22 +24,22 @@ function SupportPage() {
 
   const fetchActiveTicket = async () => {
     if (!user) return;
-    const { data, error } = await supabase
-      .from('support_tickets')
-      .select('*')
-      .eq('user_id', user.id)
-      .in('status', ['pending', 'active', 'in_progress', 'escalated'])
-      .order('last_message_at', { ascending: false })
+    const { data } = await supabase
+      .from("support_tickets")
+      .select("*")
+      .eq("user_id", user.id)
+      .in("status", ["pending", "active", "in_progress", "escalated"])
+      .order("last_message_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (data) {
       setTicket(data as any);
       const { data: msgs } = await supabase
-        .from('support_messages')
-        .select('*')
-        .eq('ticket_id', data.id)
-        .order('created_at', { ascending: true });
+        .from("support_messages")
+        .select("*")
+        .eq("ticket_id", data.id)
+        .order("created_at", { ascending: true });
       setMessages((msgs ?? []) as any);
     }
     setLoading(false);
@@ -73,12 +73,12 @@ function SupportPage() {
   const startNewTicket = async (subject: string) => {
     if (!user) return;
     const { data, error } = await supabase
-      .from('support_tickets')
+      .from("support_tickets")
       .insert({
         user_id: user.id,
         subject,
-        status: 'pending',
-        priority: 'medium'
+        status: "pending",
+        priority: "medium"
       })
       .select()
       .single();
@@ -98,70 +98,70 @@ function SupportPage() {
       sender_id: user.id, 
       sender_role: "user", 
       content,
-      type: 'text'
+      type: "text"
     });
 
     if (error) toast.error(error.message);
   };
 
   const quickReplies = [
-    "How do I verify my account?",
-    "When will my gold be delivered?",
+    "How do I complete ID verification?",
+    "When will my physical delivery arrive?",
     "How do crypto deposits work?",
-    "I need help with a withdrawal",
+    "Assistance with account withdrawal",
   ];
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Concierge"
-        title="Support Center"
-        subtitle="Experience production-grade real-time support from our elite concierge team."
-        icon={<Headphones className="h-6 w-6 text-gold" />}
+        eyebrow="Direct Assistance"
+        title="Client Support"
+        subtitle="Connect with our bullion custody support desk for assistance with orders, allocations, or account queries."
+        icon={<Headphones className="h-6 w-6" />}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Main Area */}
         <div className="lg:col-span-2">
-          <Card className="overflow-hidden border-border/60 bg-card/40 backdrop-blur-md shadow-xl flex flex-col h-[70vh]">
-            <div className="flex items-center justify-between border-b border-border/50 bg-gradient-to-r from-gold/10 to-transparent px-5 py-4">
-              <div className="flex items-center gap-4">
+          <Card className="overflow-hidden border-border/70 bg-card shadow-card flex flex-col h-[70vh]">
+            <div className="flex items-center justify-between border-b border-border/50 bg-muted/20 px-5 py-4">
+              <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="h-11 w-11 rounded-full bg-gradient-gold flex items-center justify-center text-gold-foreground font-bold text-lg shadow-gold/20">
-                    A
+                  <div className="h-10 w-10 rounded-lg border border-primary/20 bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    AG
                   </div>
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card bg-emerald-500 shadow-sm" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-emerald-500 shadow-2xs" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold tracking-tight">Amira Concierge</div>
+                  <div className="font-display text-sm font-semibold tracking-tight text-foreground">Amira Custody Support</div>
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[11px] text-emerald-500 font-medium">Ready to assist</span>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Representatives Online</span>
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 {ticket && (
                   <div className="hidden sm:flex flex-col items-end">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Ticket ID</span>
-                    <span className="text-xs font-mono text-gold">#{ticket.id.slice(0, 8)}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Ticket</span>
+                    <span className="text-xs font-mono text-foreground font-semibold">#{ticket.id.slice(0, 8)}</span>
                   </div>
                 )}
-                <span className="rounded-full border border-gold/30 bg-gold/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-gold">SECURE</span>
+                <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">SECURE</span>
               </div>
             </div>
 
             <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-              <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto p-6 scroll-smooth">
+              <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-5 scroll-smooth">
                 {!ticket ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center max-w-sm mx-auto space-y-6">
-                    <div className="h-20 w-20 rounded-full bg-gold/10 flex items-center justify-center text-gold border border-gold/20 shadow-inner">
-                      <Sparkles className="h-10 w-10" />
+                  <div className="flex flex-col items-center justify-center h-full text-center max-w-sm mx-auto space-y-4 py-8">
+                    <div className="h-14 w-14 rounded-xl border border-primary/20 bg-primary/10 flex items-center justify-center text-primary">
+                      <MessageCircle className="h-7 w-7" />
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold">Start a new conversation</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        Our support team is online and ready to help. Choose a common topic below or type your message.
+                    <div className="space-y-1.5">
+                      <h3 className="font-display text-base font-semibold text-foreground">Start a Conversation</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Our support team is available to assist you. Select a topic below or type your inquiry.
                       </p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-2 pt-2">
@@ -169,7 +169,7 @@ function SupportPage() {
                         <button
                           key={q}
                           onClick={() => startNewTicket(q)}
-                          className="rounded-full border border-border/40 bg-background/40 px-4 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:bg-gold/10 hover:text-foreground active:scale-95"
+                          className="rounded-lg border border-border/70 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground"
                         >
                           {q}
                         </button>
@@ -179,24 +179,24 @@ function SupportPage() {
                 ) : (
                   <>
                     <div className="flex justify-center mb-4">
-                      <span className="text-[10px] text-muted-foreground bg-muted/30 px-3 py-1 rounded-full uppercase tracking-widest font-bold border border-border/40">
-                        Conversation started {format(new Date(ticket.created_at), "PPP")}
+                      <span className="text-[10px] text-muted-foreground bg-muted/40 px-3 py-1 rounded-full uppercase tracking-wider font-semibold border border-border/50">
+                        Inquiry opened {format(new Date(ticket.created_at), "PPP")}
                       </span>
                     </div>
-                    {messages.map((m, idx) => {
+                    {messages.map((m) => {
                       const isUser = m.sender_role === "user";
                       return (
                         <div key={m.id} className={cn("flex", isUser ? "justify-end" : "justify-start")}>
-                          <div className={cn("flex gap-3 max-w-[80%]", isUser ? "flex-row-reverse" : "flex-row")}>
+                          <div className={cn("flex gap-2.5 max-w-[80%]", isUser ? "flex-row-reverse" : "flex-row")}>
                             {!isUser && (
-                              <div className="h-8 w-8 rounded-full bg-gradient-gold shrink-0 flex items-center justify-center text-gold-foreground font-bold text-[10px]">A</div>
+                              <div className="h-7 w-7 rounded-lg border border-primary/20 bg-primary/10 shrink-0 flex items-center justify-center text-primary font-bold text-[10px]">AG</div>
                             )}
                             <div className="space-y-1">
                               <div className={cn(
-                                "rounded-2xl px-4 py-3 text-sm shadow-sm leading-relaxed",
+                                "rounded-xl px-4 py-2.5 text-xs shadow-2xs leading-relaxed",
                                 isUser 
-                                  ? "bg-gradient-gold text-gold-foreground rounded-tr-none" 
-                                  : "border border-border/60 bg-accent/40 text-foreground rounded-tl-none backdrop-blur-sm"
+                                  ? "bg-primary text-primary-foreground font-medium rounded-tr-none" 
+                                  : "border border-border/70 bg-muted/30 text-foreground rounded-tl-none"
                               )}>
                                 {m.content}
                               </div>
@@ -205,7 +205,7 @@ function SupportPage() {
                                   {format(new Date(m.created_at), "HH:mm")}
                                 </span>
                                 {isUser && (
-                                  m.is_read ? <CheckCheck className="h-3.5 w-3.5 text-blue-500" /> : <Check className="h-3.5 w-3.5 text-muted-foreground" />
+                                  m.is_read ? <CheckCheck className="h-3 w-3 text-primary" /> : <Check className="h-3 w-3 text-muted-foreground" />
                                 )}
                               </div>
                             </div>
@@ -217,81 +217,68 @@ function SupportPage() {
                 )}
               </div>
               
-              <div className="p-4 border-t border-border/50 bg-background/30 backdrop-blur-xl">
+              <div className="p-3.5 border-t border-border/50 bg-background/50">
                 <form 
                   onSubmit={(e) => { 
                     e.preventDefault(); 
                     if (!ticket) startNewTicket(input || "General Inquiry");
                     else send(); 
                   }} 
-                  className="flex gap-3 bg-background/60 p-2 rounded-2xl border border-border/40 shadow-inner"
+                  className="flex gap-2 bg-card p-1.5 rounded-xl border border-border/70 shadow-2xs"
                 >
-                  <div className="flex items-center px-1">
-                    <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-gold transition-colors">
-                      <Paperclip className="h-5 w-5" />
-                    </Button>
-                  </div>
                   <Input 
                     value={input} 
                     onChange={(e) => setInput(e.target.value)} 
-                    placeholder="Type your message here..." 
-                    className="flex-1 bg-transparent border-none focus-visible:ring-0 h-10 text-sm shadow-none"
+                    placeholder="Type your message…" 
+                    className="flex-1 bg-transparent border-none focus-visible:ring-0 h-9 text-xs shadow-none"
                   />
                   <Button 
                     type="submit" 
                     disabled={!input.trim() && !ticket} 
-                    className="h-10 bg-gradient-gold px-6 text-gold-foreground hover:shadow-gold/20 shadow-lg rounded-xl transition-all active:scale-95"
+                    className="h-9 px-4 text-xs font-semibold shadow-xs"
                   >
-                    <Send className="h-4 w-4 mr-2" /> {ticket ? "Send" : "Start"}
+                    <Send className="h-3.5 w-3.5 mr-1.5" /> {ticket ? "Send" : "Start"}
                   </Button>
                 </form>
-                <p className="mt-2 text-[10px] text-center text-muted-foreground italic">
-                  End-to-end encrypted with Amira Security Protocol v2.4
-                </p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Sidebar Info */}
-        <div className="space-y-6">
-          <Card className="bg-card/40 border-border/60">
-            <CardContent className="p-6 space-y-4">
-              <h4 className="font-bold text-sm border-b border-border/40 pb-2">Support Highlights</h4>
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <Clock className="h-4 w-4 text-emerald-500" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold">Fast Response</div>
-                    <p className="text-[10px] text-muted-foreground">Typical reply time is under 5 minutes during business hours.</p>
-                  </div>
+        <div className="space-y-4">
+          <Card className="border-border/70 bg-card shadow-card p-5 space-y-4">
+            <h4 className="font-display font-semibold text-sm border-b border-border/40 pb-2 text-foreground">Support Hours & Standards</h4>
+            <div className="space-y-3.5">
+              <div className="flex gap-3">
+                <div className="h-8 w-8 rounded-lg border border-emerald-500/20 bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <Clock className="h-4 w-4 text-emerald-500" />
                 </div>
-                <div className="flex gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
-                    <Headphones className="h-4 w-4 text-gold" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold">Expert Agents</div>
-                    <p className="text-[10px] text-muted-foreground">Our concierge team is trained in high-value asset management.</p>
-                  </div>
+                <div>
+                  <div className="text-xs font-semibold text-foreground">Rapid Response</div>
+                  <p className="text-[11px] text-muted-foreground">General inquiries typically answered in under 5 minutes during operating hours.</p>
                 </div>
               </div>
-            </CardContent>
+              <div className="flex gap-3">
+                <div className="h-8 w-8 rounded-lg border border-primary/20 bg-primary/10 flex items-center justify-center shrink-0">
+                  <Shield className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-foreground">Custody Specialists</div>
+                  <p className="text-[11px] text-muted-foreground">Direct assistance with bar allocations, audit certificates, and insured transit.</p>
+                </div>
+              </div>
+            </div>
           </Card>
 
-          <Card className="bg-gradient-gold text-gold-foreground border-none">
-            <CardContent className="p-6 text-center space-y-3">
-              <Sparkles className="h-8 w-8 mx-auto opacity-80" />
-              <h4 className="font-bold text-sm">Priority Support</h4>
-              <p className="text-xs opacity-90 leading-relaxed">
-                VIP members receive instant escalation and dedicated account managers.
-              </p>
-              <Button variant="secondary" size="sm" className="w-full bg-white/20 hover:bg-white/30 border-none text-white text-xs font-bold">
-                Learn About VIP
-              </Button>
-            </CardContent>
+          <Card className="border-border/70 bg-card shadow-card p-5 space-y-3">
+            <h4 className="font-display font-semibold text-sm text-foreground">Institutional & VIP Desk</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Clients holding allocations over $100,000 have access to a dedicated relationship manager and custom settlement options.
+            </p>
+            <Button asChild variant="outline" size="sm" className="w-full border-border/70 text-xs font-medium">
+              <a href="mailto:privatewealth@amiragold.com">Contact Private Wealth</a>
+            </Button>
           </Card>
         </div>
       </div>

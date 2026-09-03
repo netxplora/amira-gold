@@ -17,24 +17,39 @@ export const Route = createFileRoute("/app")({
 });
 
 type NavItem = { to: "/app" | "/app/buy" | "/app/marketplace" | "/app/jewelry-orders" | "/app/card" | "/app/invest" | "/app/holdings" | "/app/wallet" | "/app/crypto" | "/app/certificates" | "/app/orders" | "/app/notifications" | "/app/alerts" | "/app/kyc" | "/app/profile" | "/app/support"; label: string; icon: typeof LayoutDashboard; exact?: boolean };
-const navItems: NavItem[] = [
-  { to: "/app", label: "Overview", icon: LayoutDashboard, exact: true },
-  { to: "/app/buy", label: "Buy Gold", icon: ShoppingBag },
-  { to: "/app/marketplace", label: "Jewelry", icon: Gem },
-  { to: "/app/jewelry-orders", label: "Jewelry Orders", icon: Receipt },
-  { to: "/app/card", label: "Amira Card", icon: CreditCard },
-  { to: "/app/invest", label: "Invest", icon: TrendingUp },
-  { to: "/app/holdings", label: "Holdings", icon: Vault },
-  { to: "/app/orders", label: "Orders", icon: Receipt },
-  { to: "/app/wallet", label: "Wallet", icon: Wallet },
-  { to: "/app/crypto", label: "Crypto", icon: Bitcoin },
-  { to: "/app/certificates", label: "Certificates", icon: Award },
-  { to: "/app/support", label: "Support", icon: MessageCircle },
-  { to: "/app/notifications", label: "Notifications", icon: Bell },
-  { to: "/app/alerts", label: "Price Alerts", icon: BellRing },
-  { to: "/app/kyc", label: "Verify ID", icon: ShieldCheck },
-  { to: "/app/profile", label: "Profile", icon: UserCog },
-];
+const NAV_SECTIONS = [
+  {
+    label: "Portfolio",
+    items: [
+      { to: "/app", label: "Overview", icon: LayoutDashboard, exact: true },
+      { to: "/app/holdings", label: "Vault Holdings", icon: Vault },
+      { to: "/app/orders", label: "Orders", icon: Receipt },
+      { to: "/app/wallet", label: "Wallet", icon: Wallet },
+    ] as NavItem[],
+  },
+  {
+    label: "Transact",
+    items: [
+      { to: "/app/buy", label: "Buy Gold", icon: ShoppingBag },
+      { to: "/app/invest", label: "Invest / Sell", icon: TrendingUp },
+      { to: "/app/marketplace", label: "Jewelry", icon: Gem },
+      { to: "/app/card", label: "Amira Card", icon: CreditCard },
+      { to: "/app/crypto", label: "Crypto", icon: Bitcoin },
+    ] as NavItem[],
+  },
+  {
+    label: "Account",
+    items: [
+      { to: "/app/certificates", label: "Certificates", icon: Award },
+      { to: "/app/alerts", label: "Price Alerts", icon: BellRing },
+      { to: "/app/notifications", label: "Notifications", icon: Bell },
+      { to: "/app/kyc", label: "Verify Identity", icon: ShieldCheck },
+      { to: "/app/profile", label: "Profile", icon: UserCog },
+      { to: "/app/support", label: "Support", icon: MessageCircle },
+    ] as NavItem[],
+  },
+] as const;
+const navItems: NavItem[] = NAV_SECTIONS.flatMap((s) => s.items);
 
 function AppLayout() {
   const { user, loading, signOut, isAdmin } = useAuth();
@@ -69,52 +84,57 @@ function AppLayout() {
   return (
     <div className="flex min-h-screen bg-background bg-mesh-luxury">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-sidebar/90 p-5 backdrop-blur-xl md:flex">
-        <div className="px-1 py-1">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-border/60 bg-sidebar p-4 backdrop-blur-xl md:flex">
+        <div className="px-1 py-2">
           <Logo />
         </div>
-        <nav className="mt-8 flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
-          {navItems.map((i) => {
-            const active = i.exact ? loc.pathname === i.to : loc.pathname.startsWith(i.to);
-            const Icon = i.icon;
-            const showBadge = i.to === "/app/notifications" && unread > 0;
-            return (
-              <Link
-                key={i.to}
-                to={i.to}
-                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
-                  active
-                    ? "bg-primary/15 text-primary font-semibold border-l-[3px] border-primary pl-2.5 shadow-sm"
-                    : "text-muted-foreground hover:bg-accent/70 hover:text-foreground"
-                }`}
-              >
-                <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
-                <span className="flex-1 truncate">{i.label}</span>
-                {showBadge && (
-                  <span className="rounded-full bg-ruby px-1.5 py-0.5 text-[10px] font-bold text-ruby-foreground">{unread}</span>
-                )}
-              </Link>
-            );
-          })}
+        <nav className="mt-5 flex flex-1 flex-col gap-4 overflow-y-auto pr-0.5">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.label}>
+              <div className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{section.label}</div>
+              {section.items.map((i) => {
+                const active = i.exact ? loc.pathname === i.to : loc.pathname.startsWith(i.to);
+                const Icon = i.icon;
+                const showBadge = i.to === "/app/notifications" && unread > 0;
+                return (
+                  <Link
+                    key={i.to}
+                    to={i.to}
+                    className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
+                      active
+                        ? "bg-primary/12 text-primary font-semibold shadow-2xs"
+                        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
+                    <span className="flex-1 truncate">{i.label}</span>
+                    {showBadge && (
+                      <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground">{unread}</span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
           {isAdmin && (
-            <Link to="/admin" className="mt-3 flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
+            <Link to="/admin" className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
               <Shield className="h-4 w-4" /> Admin Console
             </Link>
           )}
         </nav>
-        <div className="mt-4 rounded-xl border border-border/70 bg-card/70 p-3.5 text-xs text-muted-foreground shadow-sm">
-          <div className="font-semibold text-foreground">Need help?</div>
-          <p className="mt-1 leading-relaxed">Live chat with our concierge — replies in minutes.</p>
-          <Link to="/app/support" className="mt-2.5 inline-flex items-center gap-1 font-medium text-primary hover:underline">
-            Open chat →
+        <div className="mt-4 rounded-xl border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+          <div className="font-display font-semibold text-foreground">Need assistance?</div>
+          <p className="mt-0.5 leading-relaxed">Our concierge team replies within minutes.</p>
+          <Link to="/app/support" className="mt-2 inline-flex items-center gap-1 font-medium text-primary hover:underline">
+            Open Support →
           </Link>
         </div>
-        <div className="mt-3">
+        <div className="mt-3 flex items-center justify-between">
           <ThemeToggle variant="inline" />
+          <Button variant="ghost" size="sm" onClick={signOut} className="justify-start text-xs text-muted-foreground hover:text-foreground">
+            <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sign out
+          </Button>
         </div>
-        <Button variant="ghost" size="sm" onClick={signOut} className="mt-2 justify-start text-muted-foreground hover:text-foreground">
-          <LogOut className="mr-2 h-4 w-4" /> Sign out
-        </Button>
       </aside>
 
       {/* Mobile drawer */}
@@ -152,13 +172,13 @@ function AppLayout() {
                     key={i.to}
                     to={i.to}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                      active ? "bg-gradient-gold text-gold-foreground shadow-gold" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      active ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className={`h-4 w-4 ${active ? "text-primary" : ""}`} />
                     <span className="flex-1">{i.label}</span>
                     {showBadge && (
-                      <span className="rounded-full bg-ruby px-1.5 py-0.5 text-[10px] font-bold text-ruby-foreground">{unread}</span>
+                      <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground">{unread}</span>
                     )}
                   </Link>
                 );
@@ -219,15 +239,15 @@ function AppLayout() {
         </div>
 
         {/* Mobile bottom nav */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/90 backdrop-blur-xl md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden">
           <div className="grid grid-cols-5">
             {navItems.slice(0, 5).map((i) => {
               const active = i.exact ? loc.pathname === i.to : loc.pathname.startsWith(i.to);
               const Icon = i.icon;
               return (
-                <Link key={i.to} to={i.to} className={`flex flex-col items-center gap-0.5 py-2 text-[10px] ${active ? "text-gold" : "text-muted-foreground"}`}>
-                  <Icon className="h-5 w-5" />
-                  {i.label}
+                <Link key={i.to} to={i.to} className={`flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
+                  <Icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} />
+                  <span className="truncate">{i.label}</span>
                 </Link>
               );
             })}

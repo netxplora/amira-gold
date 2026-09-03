@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Flag } from "@/components/Flag";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, FileCheck2, Download, Activity, Clock } from "lucide-react";
+import { ShieldCheck, FileCheck2, Download, Activity, Clock, Shield, Scale, Eye } from "lucide-react";
 import vaultInterior from "@/assets/vault-interior.jpg";
 import { downloadReservesReportPDF } from "@/lib/pdf-reserves";
 
@@ -46,10 +46,10 @@ function inferCode(location: string) {
 export const Route = createFileRoute("/proof-of-reserves")({
   head: () => ({
     meta: [
-      { title: "Proof of Reserves | Amira Gold" },
-      { name: "description", content: "Verifiable, auditable proof of all gold held in Amira Gold's LBMA-certified vaults worldwide." },
+      { title: "Proof of Reserves — Amira Gold" },
+      { name: "description", content: "Verifiable, auditable records of all physical gold held across Amira Gold's insured depository vaults worldwide." },
       { property: "og:title", content: "Proof of Reserves — Amira Gold" },
-      { property: "og:description", content: "Verifiable proof of all gold held in our vaults." },
+      { property: "og:description", content: "Verifiable proof of physical gold holdings and third-party audit reports." },
       { property: "og:image", content: vaultInterior },
     ],
   }),
@@ -79,15 +79,15 @@ function ProofPage() {
       const auditActivity: RecentActivity[] = (a ?? []).slice(0, 5).map((x) => ({
         id: `a-${x.id}`,
         type: "audit",
-        label: `${x.auditor_firm ?? "Independent"} verified ${Number(x.grams_verified).toLocaleString()} g`,
+        label: `${x.auditor_firm ?? "Independent Assayer"} verified ${Number(x.grams_verified).toLocaleString()} g`,
         meta: vaultMap.get(x.vault_id ?? "")?.name ?? "Vault",
         date: x.audit_date,
       }));
       const orderActivity: RecentActivity[] = (o ?? []).map((x: any) => ({
         id: `o-${x.id}`,
         type: "order",
-        label: `Allocation: ${Number(x.grams).toLocaleString()} g moved into custody`,
-        meta: vaultMap.get(x.vault_id ?? "")?.name ?? "Vault transfer",
+        label: `Allocation: ${Number(x.grams).toLocaleString()} g transferred into custody`,
+        meta: vaultMap.get(x.vault_id ?? "")?.name ?? "Vault custody",
         date: x.created_at,
       }));
       setRecent(
@@ -97,6 +97,7 @@ function ProofPage() {
       );
     })();
   }, []);
+
   const total = vaults.reduce((s, v) => s + Number(v.capacity_grams), 0);
 
   const handleDownload = () => {
@@ -119,172 +120,195 @@ function ProofPage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      <section
-        className="relative overflow-hidden border-b border-border/40 py-20"
-        style={{
-          backgroundImage: `linear-gradient(180deg, oklch(0.16 0.012 250 / 0.92), oklch(0.16 0.012 250 / 0.96)), url(${vaultInterior})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-card/60 px-3 py-1 text-xs uppercase tracking-widest text-gold backdrop-blur">
-            <ShieldCheck className="h-3.5 w-3.5" /> Independently audited
+      {/* Hero Section */}
+      <section className="border-b border-border/40 bg-gradient-to-b from-card/40 via-background to-background py-14 sm:py-20">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+            <ShieldCheck className="h-3.5 w-3.5" /> Independently Audited
           </span>
-          <h1 className="mt-4 text-4xl font-bold md:text-6xl">
-            Proof of <span className="text-gradient-gold">Reserves</span>
+          <h1 className="font-display mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+            Proof of <span className="text-primary">Physical Reserves</span>
           </h1>
-          <p className="mt-4 text-muted-foreground">
-            Every gram of gold owned by our customers is fully backed and independently audited.
+          <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground leading-relaxed sm:text-sm">
+            Every gram of gold allocated to customer accounts is backed 1:1 by physical bullion held in high-security depositories and verified by regular external audits.
           </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Button onClick={handleDownload} className="rounded-full bg-gradient-gold text-gold-foreground shadow-gold hover:opacity-90">
-              <Download className="mr-1.5 h-4 w-4" /> Download PDF Report
+          <div className="mt-6 flex justify-center">
+            <Button onClick={handleDownload} className="font-semibold shadow-xs">
+              <Download className="mr-1.5 h-4 w-4" /> Download Official PDF Report
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Educational Section */}
-      <section className="border-b border-border/40 bg-card/30 py-16">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid gap-10 md:grid-cols-3">
+      {/* Principles Section */}
+      <section className="border-b border-border/60 bg-muted/20 py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 sm:grid-cols-3">
             {[
               {
-                title: "1:1 Physical Backing",
-                desc: "Every fraction of digital gold you hold is backed by actual, physical gold stored in our vaults. There is zero fractional reserve lending."
+                icon: Shield,
+                title: "1:1 Physical Allocation",
+                desc: "Every fraction of gold recorded in user balances matches physical bars in insured vaults. We do not practice fractional lending or rehypothecation.",
               },
               {
-                title: "Independent Verification",
-                desc: "We regularly invite external, third-party assayers and audit firms to physically count, weigh, and verify the purity of our holdings."
+                icon: FileCheck2,
+                title: "External Third-Party Audits",
+                desc: "Independent assayers and certified audit firms perform physical weight, purity, and bar count verifications on scheduled intervals.",
               },
               {
-                title: "Transparent Ledger",
-                desc: "Our records of customer holdings and vault capacities are synchronized and published, ensuring total liabilities never exceed total assets."
-              }
-            ].map((item, i) => (
-              <div key={i} className="text-center md:text-left">
-                <h3 className="text-xl font-semibold">{item.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
+                icon: Eye,
+                title: "Auditable Public Ledger",
+                desc: "Our published vault capacity and audit registers ensure that total customer liabilities never exceed actual verified physical assets in storage.",
+              },
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <Card key={i} className="border-border/70 bg-card shadow-card p-5 sm:p-6 transition-all hover:border-primary/40">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display mt-3 text-base font-semibold text-foreground">{item.title}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-16">
-        <Card className="border-gold/40 bg-gradient-to-br from-card to-background shadow-gold">
-          <CardContent className="grid gap-6 p-10 md:grid-cols-3 md:items-center">
+      {/* Main Content Area */}
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        {/* Aggregate Stats Card */}
+        <Card className="border-border/70 bg-card shadow-card p-6 sm:p-8">
+          <div className="grid gap-6 md:grid-cols-3 md:items-center">
             <div className="md:col-span-2">
-              <div className="text-xs uppercase tracking-widest text-gold">Total gold under custody</div>
-              <div className="mt-2 text-5xl font-bold text-gradient-gold md:text-6xl">{total.toLocaleString()} <span className="text-3xl">g</span></div>
-              <div className="mt-1 text-sm text-muted-foreground">Last audit: {new Date().toLocaleDateString()}</div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-primary">Total Custody Assets</span>
+              <div className="font-display mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                {total.toLocaleString()} <span className="text-xl font-normal text-muted-foreground sm:text-2xl">grams</span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Equivalent to {(total / 1000).toFixed(2)} kg across {vaults.length} international depository locations.
+              </p>
             </div>
-            <div className="flex items-center justify-center md:justify-end">
-              <div className="rounded-2xl border border-emerald/30 bg-emerald/5 p-5 text-center">
-                <FileCheck2 className="mx-auto h-8 w-8 text-emerald" />
-                <div className="mt-2 text-xs text-muted-foreground">Independent audits</div>
-                <div className="mt-0.5 text-2xl font-bold text-gradient-emerald">{audits.length}</div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">on record</div>
+            <div className="flex md:justify-end">
+              <div className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center md:w-auto md:min-w-[180px]">
+                <FileCheck2 className="mx-auto h-6 w-6 text-emerald-500" />
+                <div className="mt-1 font-display text-2xl font-bold text-foreground">{audits.length}</div>
+                <div className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Audits Completed</div>
               </div>
             </div>
-          </CardContent>
+          </div>
         </Card>
 
-        <h2 className="mt-12 text-2xl font-bold">Vault-by-vault breakdown</h2>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {vaults.map((v) => {
-            const code = inferCode(v.location);
-            return (
-              <Card key={v.id} className="border-border/60 bg-card transition-all hover:-translate-y-0.5 hover:border-gold/40">
-                <CardContent className="p-6">
+        {/* Vault Breakdown */}
+        <div className="mt-12 sm:mt-16">
+          <div className="mb-6">
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Storage Network</span>
+            <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground">Depository Vault Breakdown</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Physical gold distributed across top-tier international jurisdictions.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {vaults.map((v) => {
+              const code = inferCode(v.location);
+              return (
+                <Card key={v.id} className="border-border/70 bg-card shadow-card p-5 transition-all hover:border-primary/40">
                   <div className="flex items-center gap-3">
-                    {code && <Flag code={code} className="h-7 w-10 text-2xl" />}
+                    {code && <Flag code={code} className="h-6 w-8 rounded-xs shadow-2xs" />}
                     <div>
-                      <h3 className="text-lg font-semibold">{v.name}</h3>
-                      <div className="text-sm text-muted-foreground">{v.location}</div>
+                      <h3 className="font-display text-sm font-semibold text-foreground">{v.name}</h3>
+                      <div className="text-xs text-muted-foreground">{v.location}</div>
                     </div>
                   </div>
-                  <div className="mt-5 flex items-baseline justify-between">
+                  <div className="mt-4 flex items-baseline justify-between border-t border-border/50 pt-3">
                     <div>
-                      <div className="text-2xl font-bold text-gradient-gold">{Number(v.capacity_grams).toLocaleString()} g</div>
-                      <div className="text-xs text-muted-foreground">Capacity</div>
+                      <div className="font-display text-lg font-bold text-foreground">{Number(v.capacity_grams).toLocaleString()} g</div>
+                      <div className="text-[11px] text-muted-foreground">Allocated Capacity</div>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald/30 bg-emerald/10 px-2 py-0.5 text-xs text-emerald">
-                      <ShieldCheck className="h-3 w-3" /> Insured
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                      <ShieldCheck className="h-3 w-3" /> Fully Insured
                     </span>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Independent audits table */}
-        <h2 className="mt-16 text-2xl font-bold">Independent audit log</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Every entry is conducted by an external assayer or audit firm. Reports available on request.</p>
-        <Card className="mt-6 border-border/60 bg-card">
-          <CardContent className="p-0">
+        {/* Audit Log Table */}
+        <div className="mt-12 sm:mt-16">
+          <div className="mb-6">
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Verification History</span>
+            <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground">Independent Audit Register</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Physical verification logs conducted by accredited inspection bodies.</p>
+          </div>
+          <Card className="border-border/70 bg-card shadow-card overflow-hidden">
             <div className="divide-y divide-border/60">
               {audits.length === 0 ? (
-                <div className="p-10 text-center text-sm text-muted-foreground">No audits on record yet.</div>
-              ) : audits.map((a) => {
-                const v = vaults.find((x) => x.id === a.vault_id);
-                const code = v ? inferCode(v.location) : "";
-                return (
-                  <div key={a.id} className="grid gap-4 p-5 md:grid-cols-[auto_1fr_auto] md:items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-emerald shadow-emerald">
-                        <FileCheck2 className="h-5 w-5 text-emerald-foreground" />
+                <div className="p-8 text-center text-xs text-muted-foreground">No audit records available.</div>
+              ) : (
+                audits.map((a) => {
+                  const v = vaults.find((x) => x.id === a.vault_id);
+                  const code = v ? inferCode(v.location) : "";
+                  return (
+                    <div key={a.id} className="grid gap-3 p-4 sm:p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-500">
+                          <FileCheck2 className="h-4 w-4" />
+                        </div>
+                        {code && <Flag code={code} className="h-5 w-7" />}
                       </div>
-                      {code && <Flag code={code} className="h-6 w-9" />}
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-baseline gap-2">
-                        <span className="font-semibold">{a.auditor_firm ?? "Independent"}</span>
-                        <span className="text-xs text-muted-foreground">· {a.auditor_name}</span>
+                      <div>
+                        <div className="flex flex-wrap items-baseline gap-2">
+                          <span className="text-sm font-semibold text-foreground">{a.auditor_firm ?? "Independent Assayer"}</span>
+                          <span className="text-xs text-muted-foreground">· Lead: {a.auditor_name}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {v ? `${v.name} — ${v.location}` : "Multi-vault verification"}
+                        </div>
+                        {a.notes && <p className="mt-1 text-xs text-muted-foreground/90">{a.notes}</p>}
                       </div>
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {v ? `${v.name} — ${v.location}` : "Cross-vault audit"}
+                      <div className="text-left sm:text-right">
+                        <div className="font-display text-base font-bold text-foreground">{Number(a.grams_verified).toLocaleString()} g</div>
+                        <div className="text-[11px] text-muted-foreground">{new Date(a.audit_date).toLocaleDateString()}</div>
                       </div>
-                      {a.notes && <p className="mt-1.5 text-sm text-muted-foreground">{a.notes}</p>}
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-gradient-gold">{Number(a.grams_verified).toLocaleString()} g</div>
-                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{new Date(a.audit_date).toLocaleDateString()}</div>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </div>
 
-        {/* Recent activity feed */}
-        <h2 className="mt-16 text-2xl font-bold">Recent custody activity</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Live feed of allocations and audit events across our vaults.</p>
-        <Card className="mt-6 border-border/60 bg-card">
-          <CardContent className="p-0">
+        {/* Activity Stream */}
+        <div className="mt-12 sm:mt-16">
+          <div className="mb-6">
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Live Ledger</span>
+            <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground">Recent Custody Operations</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Chronological feed of asset allocations and verifications.</p>
+          </div>
+          <Card className="border-border/70 bg-card shadow-card overflow-hidden">
             <div className="divide-y divide-border/60">
               {recent.length === 0 ? (
-                <div className="p-10 text-center text-sm text-muted-foreground">No recent activity.</div>
-              ) : recent.map((r) => (
-                <div key={r.id} className="flex items-center gap-4 p-4">
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-full ${r.type === "audit" ? "bg-emerald/15 text-emerald" : "bg-gold/15 text-gold"}`}>
-                    {r.type === "audit" ? <FileCheck2 className="h-4 w-4" /> : <Activity className="h-4 w-4" />}
+                <div className="p-8 text-center text-xs text-muted-foreground">No recent activity recorded.</div>
+              ) : (
+                recent.map((r) => (
+                  <div key={r.id} className="flex items-center gap-3.5 p-4 sm:p-5">
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${r.type === "audit" ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-500" : "border border-primary/20 bg-primary/10 text-primary"}`}>
+                      {r.type === "audit" ? <FileCheck2 className="h-4 w-4" /> : <Activity className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate text-xs font-medium text-foreground sm:text-sm">{r.label}</div>
+                      <div className="text-[11px] text-muted-foreground">{r.meta}</div>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
+                      <Clock className="h-3 w-3" /> {new Date(r.date).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{r.label}</div>
-                    <div className="text-xs text-muted-foreground">{r.meta}</div>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" /> {new Date(r.date).toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </div>
       </section>
 
       <SiteFooter />

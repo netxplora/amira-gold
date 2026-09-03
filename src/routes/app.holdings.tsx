@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { useGoldPrice, formatUSD } from "@/lib/gold-price";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Vault, Coins, ShoppingBag, ArrowUpRight } from "lucide-react";
+import { Vault, Coins, ShoppingBag, ArrowUpRight, ShieldCheck, ArrowRight } from "lucide-react";
 import { PageHeader, StatTile } from "@/components/PageHeader";
 import { Flag } from "@/components/Flag";
 
@@ -23,9 +23,10 @@ function locationCode(loc?: string | null): string | null {
   if (l.includes("dubai") || l.includes("emirates") || l.includes("uae")) return "AE";
   if (l.includes("singap")) return "SG";
   if (l.includes("london") || l.includes("united kingdom") || l.includes("uk")) return "GB";
+  if (l.includes("toronto") || l.includes("canada")) return "CA";
+  if (l.includes("riyadh") || l.includes("saudi")) return "SA";
   if (l.includes("new york") || l.includes("usa")) return "US";
   if (l.includes("frankfurt") || l.includes("germany")) return "DE";
-  if (l.includes("hong kong")) return "HK";
   return null;
 }
 
@@ -51,33 +52,36 @@ function HoldingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Your Portfolio"
-        title="Holdings"
-        subtitle="Allocated gold across our LBMA-certified vaults plus your fractional digital balance."
+        eyebrow="Custody Portfolio"
+        title="Bullion Holdings"
+        subtitle="Summary of physically allocated gold in insured vaults and fractional digital positions."
         icon={<Vault className="h-6 w-6" />}
         actions={
-          <Button asChild className="bg-gradient-gold text-gold-foreground hover:opacity-90">
-            <Link to="/app/buy"><ShoppingBag className="mr-2 h-4 w-4" /> Buy more gold</Link>
+          <Button asChild className="shadow-xs font-semibold">
+            <Link to="/app/buy"><ShoppingBag className="mr-2 h-4 w-4" /> Buy Gold</Link>
           </Button>
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatTile label="Total Gold" value={`${total.toFixed(4)} g`} hint={`≈ ${formatUSD(value)}`} accent="gold" icon={<Coins className="h-4 w-4" />} />
-        <StatTile label="Vaulted" value={`${vaulted.toFixed(4)} g`} hint={`${holdings.filter((h) => h.vault_id).length} vault(s)`} accent="silver" icon={<Vault className="h-4 w-4" />} />
-        <StatTile label="Digital" value={`${digital.toFixed(4)} g`} hint="Instantly tradeable" accent="muted" icon={<ArrowUpRight className="h-4 w-4" />} />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatTile label="Total Gold Weight" value={`${total.toFixed(4)} g`} hint={`Est. value: ${formatUSD(value)}`} accent="gold" icon={<Coins className="h-4 w-4" />} />
+        <StatTile label="Vault Allocated" value={`${vaulted.toFixed(4)} g`} hint={`${holdings.filter((h) => h.vault_id).length} depository location(s)`} accent="silver" icon={<Vault className="h-4 w-4" />} />
+        <StatTile label="Digital Balance" value={`${digital.toFixed(4)} g`} hint="Instantly liquid / tradeable" accent="muted" icon={<ArrowUpRight className="h-4 w-4" />} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {holdings.length === 0 && (
-          <Card className="border-border/60 bg-card/80 md:col-span-2">
+          <Card className="border-border/70 bg-card shadow-card sm:col-span-2">
             <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold">
-                <Coins className="h-7 w-7" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                <Coins className="h-6 w-6" />
               </div>
-              <p className="text-sm text-muted-foreground">No holdings yet — buy your first gold bar to get started.</p>
-              <Button asChild className="bg-gradient-gold text-gold-foreground hover:opacity-90">
-                <Link to="/app/buy">Browse gold bars</Link>
+              <h3 className="font-display text-base font-semibold text-foreground">No Gold Holdings Recorded</h3>
+              <p className="max-w-sm text-xs text-muted-foreground leading-relaxed">
+                Purchase fractional gold or physical bullion bars to establish your allocated custody positions.
+              </p>
+              <Button asChild className="mt-2 shadow-xs font-semibold">
+                <Link to="/app/buy">Browse Bullion Products <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               </Button>
             </CardContent>
           </Card>
@@ -85,40 +89,42 @@ function HoldingsPage() {
         {holdings.map((h) => {
           const code = h.vault ? locationCode(h.vault.location) : null;
           return (
-            <Card key={h.id} className="group border-border/60 bg-card/80 transition-all hover:border-gold/40 hover:shadow-gold">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {code ? (
-                      <Flag code={code} className="h-7 w-10" />
-                    ) : (
-                      <div className="flex h-7 w-10 items-center justify-center rounded-sm bg-gradient-silver text-[10px] font-bold text-silver-foreground">
-                        DIG
-                      </div>
-                    )}
-                    <div>
-                      <div className="font-semibold">{h.vault ? h.vault.name : "Digital Gold"}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {h.vault ? h.vault.location : "Fractional, instantly tradeable"}
-                      </div>
+            <Card key={h.id} className="border-border/70 bg-card shadow-card p-5 sm:p-6 transition-all hover:border-primary/40">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  {code ? (
+                    <Flag code={code} className="h-6 w-8 rounded-xs shadow-2xs" />
+                  ) : (
+                    <div className="flex h-6 w-8 items-center justify-center rounded-xs border border-border/70 bg-muted/40 text-[10px] font-bold text-muted-foreground">
+                      DIG
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-display text-sm font-semibold text-foreground">{h.vault ? h.vault.name : "Digital Gold Allocation"}</h3>
+                    <div className="text-xs text-muted-foreground">
+                      {h.vault ? h.vault.location : "Fractional balance, immediate liquidity"}
                     </div>
                   </div>
-                  <span className="rounded-full border border-gold/30 bg-gold/5 px-2 py-0.5 text-[10px] uppercase tracking-widest text-gold">
-                    {h.vault ? "Allocated" : "Digital"}
-                  </span>
                 </div>
-                <div className="mt-5 flex items-end justify-between">
-                  <div>
-                    <div className="text-3xl font-bold text-gradient-gold">{Number(h.grams).toFixed(4)} g</div>
-                    <div className="text-sm text-muted-foreground">{formatUSD(Number(h.grams) * pricePerGram)}</div>
-                  </div>
-                  {h.vault && (
-                    <Link to="/app/certificates" className="text-xs text-gold hover:underline">
-                      View certificate →
-                    </Link>
-                  )}
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${h.vault ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border border-primary/20 bg-primary/10 text-primary"}`}>
+                  {h.vault ? "Allocated" : "Digital"}
+                </span>
+              </div>
+              <div className="mt-5 flex items-end justify-between border-t border-border/50 pt-4">
+                <div>
+                  <div className="font-display text-2xl font-bold tracking-tight text-foreground">{Number(h.grams).toFixed(4)} <span className="text-sm font-normal text-muted-foreground">g</span></div>
+                  <div className="text-xs text-muted-foreground">{formatUSD(Number(h.grams) * pricePerGram)}</div>
                 </div>
-              </CardContent>
+                {h.vault ? (
+                  <Link to="/app/certificates" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                    Certificate <ArrowRight className="h-3 w-3" />
+                  </Link>
+                ) : (
+                  <Link to="/app/invest" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                    Trade / Sell <ArrowRight className="h-3 w-3" />
+                  </Link>
+                )}
+              </div>
             </Card>
           );
         })}

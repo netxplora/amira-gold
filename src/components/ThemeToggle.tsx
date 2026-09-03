@@ -1,15 +1,6 @@
-import { Sun, Moon, Monitor, Check } from "lucide-react";
-import { useTheme, type ThemeMode } from "@/lib/theme";
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-const options: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
-];
 
 type Props = {
   variant?: "icon" | "compact" | "inline";
@@ -17,61 +8,64 @@ type Props = {
 };
 
 export function ThemeToggle({ variant = "icon", className }: Props) {
-  const { theme, resolved, setTheme } = useTheme();
+  const { resolved, setTheme } = useTheme();
+
+  const toggle = () => {
+    const next = resolved === "dark" ? "light" : "dark";
+    setTheme(next);
+  };
 
   if (variant === "inline") {
     return (
-      <div className={`grid grid-cols-3 gap-1 rounded-lg border border-border/60 bg-card/40 p-1 ${className ?? ""}`}>
-        {options.map(({ value, label, icon: Icon }) => {
-          const active = theme === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setTheme(value)}
-              className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs transition-colors ${
-                active
-                  ? "bg-gradient-gold text-gold-foreground shadow-gold"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              }`}
-              aria-pressed={active}
-              aria-label={`Use ${label.toLowerCase()} theme`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
-          );
-        })}
+      <div className={`grid grid-cols-2 gap-1 rounded-lg border border-border/70 bg-card p-1 shadow-2xs ${className ?? ""}`}>
+        <button
+          type="button"
+          onClick={() => setTheme("light")}
+          className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+            resolved === "light"
+              ? "bg-primary text-primary-foreground shadow-2xs"
+              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+          }`}
+          aria-pressed={resolved === "light"}
+          aria-label="Use light mode"
+        >
+          <Sun className="h-3.5 w-3.5" />
+          Light
+        </button>
+        <button
+          type="button"
+          onClick={() => setTheme("dark")}
+          className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+            resolved === "dark"
+              ? "bg-primary text-primary-foreground shadow-2xs"
+              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+          }`}
+          aria-pressed={resolved === "dark"}
+          aria-label="Use dark mode"
+        >
+          <Moon className="h-3.5 w-3.5" />
+          Dark
+        </button>
       </div>
     );
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size={variant === "compact" ? "sm" : "icon"}
-          className={`rounded-full ${className ?? ""}`}
-          aria-label="Change theme"
-        >
-          {resolved === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          {variant === "compact" && <span className="ml-1 text-xs capitalize">{theme}</span>}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        {options.map(({ value, label, icon: Icon }) => (
-          <DropdownMenuItem
-            key={value}
-            onClick={() => setTheme(value)}
-            className="flex items-center gap-2"
-          >
-            <Icon className="h-4 w-4" />
-            <span className="flex-1">{label}</span>
-            {theme === value && <Check className="h-3.5 w-3.5 text-gold" />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size={variant === "compact" ? "sm" : "icon"}
+      onClick={toggle}
+      className={`relative h-9 w-9 rounded-full border border-border/70 bg-card/60 transition-all duration-300 hover:scale-105 hover:border-primary/40 hover:bg-accent active:scale-95 ${className ?? ""}`}
+      aria-label={`Switch to ${resolved === "dark" ? "light" : "dark"} mode`}
+      title={`Switch to ${resolved === "dark" ? "light" : "dark"} mode`}
+    >
+      <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform duration-300 dark:-rotate-90 dark:scale-0 text-amber-500" />
+      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform duration-300 dark:rotate-0 dark:scale-100 text-primary" />
+      {variant === "compact" && (
+        <span className="ml-1 text-xs capitalize text-muted-foreground">
+          {resolved === "dark" ? "Dark" : "Light"}
+        </span>
+      )}
+    </Button>
   );
 }

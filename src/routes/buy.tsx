@@ -72,42 +72,42 @@ function BuyPage() {
         </div>
 
         {products.length === 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Card key={i} className="border-border/70 bg-card shadow-card">
-                <CardContent className="p-5">
-                  <div className="mx-auto h-24 w-24 animate-pulse rounded-xl bg-muted/40" />
-                  <div className="mt-4 h-4 animate-pulse rounded bg-muted/40" />
-                  <div className="mt-2 h-6 animate-pulse rounded bg-muted/40" />
+                <CardContent className="p-4 sm:p-5">
+                  <div className="mx-auto h-20 w-20 sm:h-24 sm:w-24 animate-pulse rounded-xl bg-muted/40" />
+                  <div className="mt-3 h-4 animate-pulse rounded bg-muted/40" />
+                  <div className="mt-2 h-5 animate-pulse rounded bg-muted/40" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {products.map((p) => {
               const price = Number(p.weight_grams) * pricePerGram * (1 + Number(p.premium_pct) / 100);
               return (
-                <Card key={p.id} className="group overflow-hidden border-border/70 bg-card shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card-hover p-0 flex flex-col justify-between">
-                  <div className="p-5 text-center">
-                    <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-xl border border-border/60 bg-muted/20">
+                <Card key={p.id} className="card-3d group overflow-hidden border-border/70 bg-card p-0 flex flex-col justify-between">
+                  <div className="p-3.5 sm:p-5 text-center">
+                    <div className="relative mx-auto h-20 w-20 sm:h-28 sm:w-28 overflow-hidden rounded-xl border border-border/60 bg-muted/20">
                       <img
                         src={goldBar}
                         alt={`${p.weight_grams}g gold bar`}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <span className="absolute bottom-1 right-1 rounded-sm border border-border/60 bg-background/90 px-1.5 py-0.5 text-[10px] font-bold text-foreground backdrop-blur">
+                      <span className="absolute bottom-1 right-1 rounded-sm border border-border/60 bg-background/90 px-1.5 py-0.5 text-[9px] font-bold text-foreground sm:text-[10px] backdrop-blur">
                         {p.weight_grams}g
                       </span>
                     </div>
-                    <h3 className="font-display mt-4 text-sm font-semibold text-foreground">{p.name}</h3>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">{p.premium_pct}% mint premium</div>
-                    <div className="font-display mt-2 text-xl font-bold text-primary">{formatUSD(price)}</div>
+                    <h3 className="font-display mt-3 text-xs font-semibold text-foreground sm:text-sm">{p.name}</h3>
+                    <div className="mt-0.5 text-[10px] text-muted-foreground sm:text-[11px]">{p.premium_pct}% mint premium</div>
+                    <div className="font-display mt-2 text-sm font-bold text-primary sm:text-xl">{formatUSD(price)}</div>
                   </div>
-                  <div className="p-4 pt-0">
-                    <Button asChild className="w-full shadow-xs font-semibold" size="sm">
-                      <Link to="/app/buy">Buy Bullion Bar</Link>
+                  <div className="p-3 sm:p-4 pt-0">
+                    <Button asChild className="w-full shadow-xs font-semibold h-8 text-xs sm:h-9 sm:text-sm" size="sm">
+                      <Link to="/app/buy">Buy Bar</Link>
                     </Button>
                   </div>
                 </Card>

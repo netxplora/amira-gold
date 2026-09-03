@@ -25,7 +25,6 @@ export function PortfolioChart() {
         supabase.from("wallet_transactions").select("created_at,amount_usd,type").eq("user_id", user.id).order("created_at"),
       ]);
 
-      // Build cumulative gram balance and cash balance over time
       const events: Array<{ at: number; dGrams: number; dCash: number }> = [];
       (orders ?? []).forEach((o: any) => {
         if (o.status === "cancelled") return;
@@ -38,13 +37,11 @@ export function PortfolioChart() {
       });
       events.sort((a, b) => a.at - b.at);
 
-      // Build daily series
       const points: Point[] = [];
       let g = 0, c = 0;
       const start = +new Date(since);
       const end = Date.now();
       let i = 0;
-      // apply pre-range events
       while (i < events.length && events[i].at < start) {
         g += events[i].dGrams; c += events[i].dCash; i++;
       }
@@ -72,24 +69,27 @@ export function PortfolioChart() {
   const positive = change >= 0;
 
   return (
-    <Card className="border-border/60 bg-card">
+    <Card className="border-border/70 bg-card/90 shadow-card">
       <CardContent className="p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-sm text-muted-foreground">Portfolio Value</div>
-            <div className="mt-1 text-3xl font-bold tracking-tight">{formatUSD(last)}</div>
-            <div className={`mt-1 flex items-center gap-1 text-sm ${positive ? "text-emerald-400" : "text-ruby"}`}>
-              {positive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-              {positive ? "+" : ""}{formatUSD(change)} ({pct.toFixed(2)}%) · {range}
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Portfolio Valuation</div>
+            <div className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl">{formatUSD(last)}</div>
+            <div className={`mt-1.5 inline-flex items-center gap-1.5 text-xs font-semibold ${positive ? "text-emerald-500" : "text-destructive"}`}>
+              {positive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+              <span>{positive ? "+" : ""}{formatUSD(change)} ({pct.toFixed(2)}%) · {range}</span>
             </div>
           </div>
-          <div className="flex gap-1 rounded-lg border border-border/60 bg-background/40 p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
             {(["7D", "30D", "90D", "1Y"] as const).map((r) => (
               <button
                 key={r}
+                type="button"
                 onClick={() => setRange(r)}
-                className={`rounded-md px-2.5 py-1 text-xs transition-colors ${
-                  range === r ? "bg-gradient-gold text-gold-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                  range === r
+                    ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/60"
                 }`}
               >
                 {r}
@@ -97,23 +97,30 @@ export function PortfolioChart() {
             ))}
           </div>
         </div>
-        <div className="mt-5 h-56 w-full">
+        <div className="mt-6 h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} vertical={false} />
               <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
               <Tooltip
-                contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
+                contentStyle={{
+                  backgroundColor: "var(--card)",
+                  borderColor: "var(--border)",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  fontSize: "12px",
+                  color: "var(--foreground)",
+                }}
                 formatter={(v: number) => [formatUSD(v), "Value"]}
               />
-              <Area type="monotone" dataKey="value" stroke="var(--gold)" strokeWidth={2} fill="url(#portfolioGradient)" />
+              <Area type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={2} fill="url(#portfolioGradient)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

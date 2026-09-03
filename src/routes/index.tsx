@@ -1,20 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { GoldPriceTicker } from "@/components/GoldPriceTicker";
 import { Flag, VAULT_LOCATIONS } from "@/components/Flag";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useGoldPrice, formatUSD } from "@/lib/gold-price";
 import {
   ShieldCheck, Vault, Truck, TrendingUp, Award, CheckCircle2, Sparkles, ArrowRight, Star,
-  CreditCard, Globe, Wallet,
+  CreditCard, Globe, Wallet, Lock, Calculator, FileCheck, Scale, RefreshCw, BarChart3,
+  Layers, ChevronRight,
 } from "lucide-react";
 import heroGold from "@/assets/hero-gold-premium.jpg";
 import vaultInterior from "@/assets/vault-interior.jpg";
 import ceoPortrait from "@/assets/ceo-portrait.jpg";
 import deliveryTruck from "@/assets/delivery-truck.jpg";
-import heroBg from "@/assets/hero-bg-luxury.jpg";
 import amiraCardHero from "@/assets/amira-card-hero.png";
 import vaultZurich from "@/assets/vault-zurich.jpg";
 import vaultDubai from "@/assets/vault-dubai.jpg";
@@ -38,7 +41,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Amira Gold — Buy, Store & Invest in Physical Gold" },
-      { name: "description", content: "Buy LBMA-certified physical gold bars, invest in fractional digital gold from $10, and store in insured vaults across Zurich, Dubai, Singapore and London." },
+      { name: "description", content: "Buy LBMA-certified physical gold bars, invest in fractional gold from $10, and store in insured vaults across Zurich, Dubai, Singapore and London." },
       { property: "og:title", content: "Amira Gold — Buy, Store & Invest in Physical Gold" },
       { property: "og:description", content: "Allocated physical gold. Insured vaults. Instant trading from $10." },
       { property: "og:image", content: heroGold },
@@ -54,7 +57,11 @@ function Home() {
       <SiteHeader />
       <Hero />
       <TrustBar />
+      <InteractiveCalculatorSection />
+      <BullionCatalogSection />
       <VaultsStrip />
+      <VaultComparisonSection />
+      <SecurityArchitectureSection />
       <HowItWorks />
       <ProductHighlight />
       <FeaturedJewelry />
@@ -70,64 +77,89 @@ function Home() {
 }
 
 function Hero() {
+  const { pricePerGram } = useGoldPrice();
   return (
-    <section className="relative overflow-hidden">
-      {/* Hero background image */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroBg})` }}
-        aria-hidden
-      />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-background/95 via-background/80 to-background/60" aria-hidden />
-      <div className="absolute inset-0 -z-10 bg-mesh-luxury opacity-60" aria-hidden />
-      <div className="pointer-events-none absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-emerald/10 blur-[120px]" />
-      <div className="pointer-events-none absolute -right-32 -top-20 h-96 w-96 rounded-full bg-gold/20 blur-[120px]" />
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 md:grid-cols-2 md:gap-16 md:py-28">
-        <div className="flex flex-col justify-center">
-          <GoldPriceTicker />
-          <h1 className="mt-6 text-4xl font-bold leading-[1.04] tracking-tight md:text-6xl">
-            Own real gold.
-            <br />
-            <span className="text-gradient-gold">Stored. Insured.</span>
-            <br />
-            <span className="text-gradient-silver">Yours.</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg">
-            Buy physical gold bars from 1g to 100g, invest in fractional digital
-            gold from <span className="text-foreground font-medium">$10</span>, and store securely in
-            <span className="text-foreground font-medium"> Zurich, Dubai, Riyadh, Singapore</span> and
-            <span className="text-foreground font-medium"> London</span>.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-gradient-gold text-gold-foreground shadow-gold hover:opacity-90 rounded-full">
-              <Link to="/buy">Buy Gold <ArrowRight className="ml-1 h-4 w-4" /></Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full border-border/60 bg-card/40 backdrop-blur">
-              <Link to="/invest"><Sparkles className="mr-1 h-4 w-4 text-gold" /> Start Investing</Link>
-            </Button>
-          </div>
-          <div className="mt-10 grid grid-cols-3 gap-4 border-t border-border/50 pt-6 text-xs text-muted-foreground">
-            <Stat label="Under custody" value="$84M+" />
-            <Stat label="Active investors" value="12,400+" />
-            <Stat label="Avg. delivery" value="3–7 days" />
-          </div>
-        </div>
-        <div className="relative">
-          <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-gold opacity-15 blur-3xl" />
-          <div className="relative overflow-hidden rounded-3xl border border-border/60 ring-gold-soft">
-            <img
-              src={heroGold}
-              alt="Premium gold bars stacked on dark marble with red velvet accent"
-              width={1920}
-              height={1280}
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-background/95 via-background/70 to-transparent p-5">
+    <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-b from-card/40 via-background to-background pt-6 pb-12 sm:pt-10 sm:pb-16 lg:py-20">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-8 items-center md:grid-cols-12 md:gap-12">
+          {/* Left Hero Content */}
+          <div className="flex flex-col justify-center md:col-span-7 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <GoldPriceTicker />
+            </div>
+
+            <h1 className="font-display mt-5 text-3xl font-bold leading-[1.12] tracking-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
+              Physical gold ownership.
+              <br />
+              <span className="text-primary">Insured &amp; Allocated.</span>
+              <br />
+              <span className="text-muted-foreground">Stored globally.</span>
+            </h1>
+
+            <p className="mt-4 max-w-xl text-sm text-muted-foreground leading-relaxed sm:text-base md:text-lg">
+              Purchase authenticated LBMA bullion bars from 1g to 1kg, invest in fractional gold from
+              <span className="text-foreground font-semibold"> $10</span>, and hold allocated title in
+              <span className="text-foreground font-medium"> Zurich, Dubai, Riyadh, Singapore</span>, and
+              <span className="text-foreground font-medium"> London</span>.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="shadow-xs font-semibold">
+                <Link to="/buy">Buy Gold Bars <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-border/80 bg-card/80">
+                <Link to="/invest"><TrendingUp className="mr-1.5 h-4 w-4 text-primary" /> Fractional Investing</Link>
+              </Button>
+            </div>
+
+            {/* Quick Metrics Bar */}
+            <div className="mt-8 grid grid-cols-3 gap-4 border-t border-border/60 pt-5">
               <div>
-                <div className="text-xs uppercase tracking-widest text-gold">Allocated Physical Gold</div>
-                <div className="mt-1 text-sm font-medium">999.9 fineness · LBMA approved</div>
+                <div className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">$84M+</div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Under Custody</div>
               </div>
-              <span className="rounded-full bg-gradient-silver px-3 py-1 text-xs font-semibold text-silver-foreground">Audited</span>
+              <div>
+                <div className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">100%</div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Direct Title</div>
+              </div>
+              <div>
+                <div className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">3–7 Days</div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Insured Delivery</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Hero Visual Card */}
+          <div className="md:col-span-5 animate-slide-up">
+            <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-card">
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/40">
+                <img
+                  src={heroGold}
+                  alt="Physical gold bullion bars"
+                  width={1920}
+                  height={1280}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+                <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-emerald/30 bg-emerald/10 px-2.5 py-1 text-xs font-semibold text-emerald-500 backdrop-blur-md">
+                  <ShieldCheck className="h-3.5 w-3.5" /> Insured by Lloyd's
+                </span>
+              </div>
+              <div className="p-5">
+                <div className="flex items-center justify-between border-b border-border/50 pb-3">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-primary">Standard 100g Bar</div>
+                    <div className="font-display text-sm font-bold text-foreground">999.9 Fine Gold · Mint Serialized</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[11px] text-muted-foreground">Live Market Value</div>
+                    <div className="font-display text-sm font-bold text-primary">{formatUSD(pricePerGram * 100)}</div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free Year 1 Vault Storage</span>
+                  <Link to="/buy" className="font-semibold text-primary hover:underline">View Bars →</Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -136,64 +168,320 @@ function Hero() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function TrustBar() {
+  const items = [
+    "LBMA-Certified Good Delivery",
+    "Underwritten by Lloyd's of London",
+    "ISO 27001 Security Standard",
+    "SOC 2 Type II Verified",
+    "Quarterly Physical Audits by BDO",
+  ];
   return (
-    <div>
-      <div className="text-xl font-bold text-foreground md:text-2xl">{value}</div>
-      <div className="mt-0.5 text-[11px] uppercase tracking-wider">{label}</div>
+    <div className="border-b border-border/60 bg-muted/30 py-4 sm:py-5">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2.5 px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {items.map((i) => (
+          <span key={i} className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span>{i}</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
 
-function TrustBar() {
-  const items = ["LBMA-Certified", "Insured by Lloyd's", "ISO 27001", "SOC 2 Type II", "Audited Reserves"];
+function InteractiveCalculatorSection() {
+  const { pricePerGram } = useGoldPrice();
+  const [mode, setMode] = useState<"grams" | "usd">("grams");
+  const [amount, setAmount] = useState<number>(50);
+
+  const grams = mode === "grams" ? amount : amount / pricePerGram;
+  const usdValue = mode === "grams" ? amount * pricePerGram : amount;
+  const troyOz = grams / 31.1035;
+  const annualStorageEstimate = usdValue * 0.0025; // 0.25% annual fee
+
+  const PRESET_GRAMS = [10, 50, 100, 250, 500, 1000];
+
   return (
-    <div className="border-y border-border/40 bg-card/20 py-6">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-        {items.map((i) => (<span key={i} className="opacity-80">{i}</span>))}
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mb-8 text-center sm:mb-12">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary">Allocation Estimator</span>
+        <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Calculate Your Gold Allocation</h2>
+        <p className="mt-1.5 text-xs text-muted-foreground max-w-lg mx-auto sm:text-sm leading-relaxed">
+          Estimate live bullion valuation, troy ounce equivalent, and custody fees in real-time.
+        </p>
       </div>
-    </div>
+
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Input Controller */}
+        <Card className="border-border/70 bg-card shadow-card p-6 lg:col-span-7">
+          <div className="flex items-center justify-between border-b border-border/50 pb-4">
+            <div className="flex items-center gap-2">
+              <Calculator className="h-4 w-4 text-primary" />
+              <span className="font-display text-sm font-semibold text-foreground">Allocation Parameters</span>
+            </div>
+            <div className="flex items-center rounded-lg border border-border/70 bg-muted/40 p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => { setMode("grams"); setAmount(50); }}
+                className={`rounded-md px-3 py-1 font-medium transition-all ${mode === "grams" ? "bg-primary text-primary-foreground shadow-xs font-semibold" : "text-muted-foreground"}`}
+              >
+                Weight (Grams)
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode("usd"); setAmount(5000); }}
+                className={`rounded-md px-3 py-1 font-medium transition-all ${mode === "usd" ? "bg-primary text-primary-foreground shadow-xs font-semibold" : "text-muted-foreground"}`}
+              >
+                Amount ($ USD)
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="flex items-baseline justify-between">
+              <label className="text-xs font-medium text-muted-foreground">
+                {mode === "grams" ? "Selected Bullion Weight" : "Investment Budget"}
+              </label>
+              <span className="font-display text-xl font-bold text-foreground">
+                {mode === "grams" ? `${amount} g` : formatUSD(amount)}
+              </span>
+            </div>
+
+            <input
+              type="range"
+              min={mode === "grams" ? 5 : 100}
+              max={mode === "grams" ? 1000 : 100000}
+              step={mode === "grams" ? 5 : 250}
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              className="mt-3 w-full accent-primary cursor-pointer"
+            />
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {PRESET_GRAMS.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => { setMode("grams"); setAmount(g); }}
+                  className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
+                    mode === "grams" && amount === g
+                      ? "border-primary bg-primary/10 text-primary font-semibold"
+                      : "border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                  }`}
+                >
+                  {g >= 1000 ? "1 kg" : `${g}g`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3 border-t border-border/50 pt-5 text-xs sm:grid-cols-3">
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+              <div className="text-muted-foreground">Gross Weight</div>
+              <div className="font-display mt-1 text-sm font-bold text-foreground">{grams.toFixed(2)} g</div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+              <div className="text-muted-foreground">Troy Ounces</div>
+              <div className="font-display mt-1 text-sm font-bold text-foreground">{troyOz.toFixed(2)} oz</div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-3 col-span-2 sm:col-span-1">
+              <div className="text-muted-foreground">Purity Standard</div>
+              <div className="font-display mt-1 text-sm font-bold text-foreground">999.9 (24K)</div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Live Estimation Output Card */}
+        <Card className="border-border/70 bg-card/95 shadow-card p-6 lg:col-span-5 flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-primary">Allocation Summary</div>
+            <div className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              {formatUSD(usdValue)}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Based on spot rate of {formatUSD(pricePerGram)}/gram
+            </div>
+
+            <div className="mt-6 space-y-3 text-xs border-t border-border/50 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Year 1 Vault Custody</span>
+                <span className="font-bold text-emerald-500">$0.00 (Free)</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Lloyd's Insurance Coverage</span>
+                <span className="font-medium text-foreground">Included 100%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Serialized Mint Assays</span>
+                <span className="font-medium text-foreground">Included</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Subsequent Annual Custody (0.25%)</span>
+                <span className="font-medium text-muted-foreground">{formatUSD(annualStorageEstimate)}/year</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-border/60">
+            <Button asChild className="w-full shadow-xs font-semibold">
+              <Link to="/buy">Proceed With Allocation <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            </Button>
+          </div>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+function BullionCatalogSection() {
+  const { pricePerGram } = useGoldPrice();
+
+  const BARS = [
+    { name: "10g Cast Bar", grams: 10, purity: "999.9", ref: "LBMA-10G", refiner: "Valcambi / PAMP" },
+    { name: "50g Minted Bar", grams: 50, purity: "999.9", ref: "LBMA-50G", refiner: "Heraeus / Metalor" },
+    { name: "100g Minted Bar", grams: 100, purity: "999.9", ref: "LBMA-100G", refiner: "Argor-Heraeus" },
+    { name: "1000g (1kg) Bullion Bar", grams: 1000, purity: "999.9", ref: "LBMA-1KG", refiner: "PAMP Suisse" },
+  ];
+
+  const COINS = [
+    { name: "1 oz American Gold Eagle", grams: 31.1035, purity: "916.7 (22K)", origin: "United States Mint" },
+    { name: "1 oz Canadian Maple Leaf", grams: 31.1035, purity: "999.9 (24K)", origin: "Royal Canadian Mint" },
+    { name: "1 oz British Britannia", grams: 31.1035, purity: "999.9 (24K)", origin: "The Royal Mint UK" },
+    { name: "1 oz South African Krugerrand", grams: 31.1035, purity: "916.7 (22K)", origin: "South African Mint" },
+  ];
+
+  return (
+    <section className="border-t border-border/60 bg-muted/20 py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Bullion Product Catalog</span>
+            <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">LBMA-Approved Minted Bullion</h2>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed sm:text-sm max-w-xl">
+              All physical bars and coins are certified for purity, individually serialized, and stored in bonded depositories.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="border-border/70 shadow-2xs">
+            <Link to="/buy">View All Products <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+          </Button>
+        </div>
+
+        <Tabs defaultValue="bars" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="bars">Minted Bars</TabsTrigger>
+            <TabsTrigger value="coins">Sovereign Coins</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="bars">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {BARS.map((b) => {
+                const total = b.grams * pricePerGram;
+                return (
+                  <Card key={b.name} className="border-border/70 bg-card shadow-card p-5 transition-all duration-200 hover:border-primary/40 hover:shadow-card-hover flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          {b.purity} Fine Gold
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">{b.grams}g</span>
+                      </div>
+                      <h3 className="font-display mt-3 text-base font-bold text-foreground">{b.name}</h3>
+                      <p className="mt-1 text-xs text-muted-foreground">Refinery: {b.refiner}</p>
+                    </div>
+                    <div className="mt-5 border-t border-border/50 pt-4 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase text-muted-foreground">Live Rate</div>
+                        <div className="font-display text-base font-bold text-primary">{formatUSD(total)}</div>
+                      </div>
+                      <Button asChild size="sm" className="shadow-xs">
+                        <Link to="/buy">Buy</Link>
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="coins">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {COINS.map((c) => {
+                const total = c.grams * pricePerGram;
+                return (
+                  <Card key={c.name} className="border-border/70 bg-card shadow-card p-5 transition-all duration-200 hover:border-primary/40 hover:shadow-card-hover flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald/20 bg-emerald/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500">
+                          {c.purity}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">1 oz ({c.grams.toFixed(1)}g)</span>
+                      </div>
+                      <h3 className="font-display mt-3 text-base font-bold text-foreground">{c.name}</h3>
+                      <p className="mt-1 text-xs text-muted-foreground">Issuer: {c.origin}</p>
+                    </div>
+                    <div className="mt-5 border-t border-border/50 pt-4 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase text-muted-foreground">Live Rate</div>
+                        <div className="font-display text-base font-bold text-primary">{formatUSD(total)}</div>
+                      </div>
+                      <Button asChild size="sm" className="shadow-xs">
+                        <Link to="/buy">Buy</Link>
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </section>
   );
 }
 
 function VaultsStrip() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Global Vaults</span>
-          <h2 className="mt-2 text-2xl font-bold md:text-3xl">Stored in the world's most secure jurisdictions</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Six LBMA-approved facilities across four continents. Fully insured by Lloyd's of London.</p>
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Global Custody</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Stored in Secure Depository Jurisdictions</h2>
+          <p className="mt-1 text-xs text-muted-foreground leading-relaxed sm:text-sm max-w-2xl">
+            Six LBMA-approved facilities across major financial centers. Fully insured by Lloyd's of London.
+          </p>
         </div>
-        <Link to="/proof-of-reserves" className="text-sm text-muted-foreground hover:text-foreground">View Proof of Reserves →</Link>
+        <Button asChild variant="outline" size="sm" className="border-border/70">
+          <Link to="/proof-of-reserves">View Proof of Reserves →</Link>
+        </Button>
       </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {VAULT_LOCATIONS.map((v) => (
-          <Card key={v.code} className="group relative overflow-hidden border-border/60 bg-card p-0 transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-gold">
-            <div className="relative h-40 w-full overflow-hidden">
+          <Card key={v.code} className="group overflow-hidden border-border/70 bg-card/90 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card-hover p-0">
+            <div className="relative h-40 w-full overflow-hidden bg-muted/40">
               <img
                 src={VAULT_IMAGES[v.code] ?? vaultInterior}
                 alt={`${v.city}, ${v.country} vault location`}
                 width={1024}
                 height={768}
                 loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
-              <div className="absolute left-4 top-4">
-                <Flag code={v.code} className="h-7 w-10 text-2xl shadow-lg" />
+              <div className="absolute left-3 top-3">
+                <Flag code={v.code} className="h-6 w-9 text-xl shadow-md rounded-xs" />
               </div>
-              <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full border border-emerald/30 bg-emerald/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald backdrop-blur">
-                <ShieldCheck className="h-3 w-3" /> Insured
+              <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/90 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground backdrop-blur">
+                <ShieldCheck className="h-3 w-3 text-emerald-500" /> Insured
               </span>
             </div>
-            <CardContent className="p-5">
+            <CardContent className="p-4">
               <div className="flex items-baseline justify-between">
-                <div className="font-semibold">{v.city}</div>
+                <div className="font-display font-semibold text-foreground text-base">{v.city}</div>
                 <div className="text-xs text-muted-foreground">{v.country}</div>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">{v.desc}</p>
-              <div className="mt-3 flex items-center gap-1.5 text-[11px] text-gold">
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
+              <div className="mt-3.5 flex items-center gap-1.5 text-xs font-medium text-primary border-t border-border/50 pt-2.5">
                 <Vault className="h-3.5 w-3.5" /> LBMA-approved facility
               </div>
             </CardContent>
@@ -204,32 +492,117 @@ function VaultsStrip() {
   );
 }
 
+function VaultComparisonSection() {
+  const JURISDICTIONS = [
+    { city: "Zurich", country: "Switzerland", tax: "0% VAT / 0% Wealth Duty", audit: "Monthly Physical Inventory", customs: "Bonded FreePort", access: "Direct Inspection Available" },
+    { city: "Dubai", country: "United Arab Emirates", tax: "0% VAT (DMCC Zone)", audit: "Quarterly Audit by BDO", customs: "Tax-Free Precious Metals Zone", access: "Armored Export Available" },
+    { city: "Singapore", country: "Singapore", tax: "0% Investment Precious Metals GST", audit: "Bi-annual Verification", customs: "Singapore FreePort", access: "Direct Asian Hub" },
+    { city: "London", country: "United Kingdom", tax: "0% Investment Gold VAT", audit: "Continuous LBMA Oversight", customs: "Bonded Bank Depository", access: "Global OTC Settlement" },
+  ];
+
+  return (
+    <section className="border-t border-border/60 bg-muted/20 py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 text-center sm:mb-12">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Jurisdiction Matrix</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Depository Comparison Matrix</h2>
+          <p className="mt-1 text-xs text-muted-foreground max-w-xl mx-auto sm:text-sm leading-relaxed">
+            Choose the regulatory and geographic jurisdiction that matches your wealth preservation strategy.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-border/70 bg-card shadow-card">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead>
+              <tr className="border-b border-border/60 bg-muted/40 font-semibold text-foreground">
+                <th className="p-4">Jurisdiction</th>
+                <th className="p-4">Tax Treatment</th>
+                <th className="p-4">Audit Protocol</th>
+                <th className="p-4">Customs Status</th>
+                <th className="p-4">Physical Settlement</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50 text-muted-foreground">
+              {JURISDICTIONS.map((j) => (
+                <tr key={j.city} className="hover:bg-muted/20 transition-colors">
+                  <td className="p-4 font-display font-semibold text-foreground">
+                    {j.city}, <span className="text-xs font-normal text-muted-foreground">{j.country}</span>
+                  </td>
+                  <td className="p-4">{j.tax}</td>
+                  <td className="p-4">{j.audit}</td>
+                  <td className="p-4">{j.customs}</td>
+                  <td className="p-4 font-medium text-foreground">{j.access}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SecurityArchitectureSection() {
+  const PILLARS = [
+    { icon: Scale, title: "Direct Title Bailment", desc: "You hold direct, unencumbered legal ownership. Your bullion is never treated as a liability on our balance sheet." },
+    { icon: ShieldCheck, title: "Lloyd's Underwritten Policy", desc: "100% of vault reserves and courier transit shipments are underwritten against physical theft, damage, and loss." },
+    { icon: FileCheck, title: "Cryptographic Proof of Reserves", desc: "Regularly published itemized holdings reconciled against depository receipts for complete transparency." },
+    { icon: Lock, title: "Multi-Signature Authorizations", desc: "Digital allocation transfers and withdrawal requests require multi-party biometric authorization checks." },
+  ];
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mb-10 text-center sm:mb-14">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary">Security Architecture</span>
+        <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Institutional-Grade Custody Standards</h2>
+        <p className="mt-1 text-xs text-muted-foreground max-w-xl mx-auto sm:text-sm leading-relaxed">
+          Four foundational pillars safeguarding every gram of precious metal under our administration.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {PILLARS.map((p) => {
+          const Icon = p.icon;
+          return (
+            <Card key={p.title} className="border-border/70 bg-card/90 shadow-card p-5 transition-all hover:border-primary/40">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="font-display mt-3 text-base font-semibold text-foreground">{p.title}</h3>
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function HowItWorks() {
   const steps = [
-    { n: "01", t: "Create your account", d: "Sign up in 60 seconds with email or Google." },
-    { n: "02", t: "Verify your identity", d: "Quick and secure KYC, fully encrypted." },
-    { n: "03", t: "Fund your wallet", d: "Top up via card, bank or crypto." },
-    { n: "04", t: "Buy your gold", d: "Choose grams or full bars at spot price." },
-    { n: "05", t: "Store or deliver", d: "Vault storage or insured doorstep delivery." },
+    { n: "01", t: "Open Account", d: "Register a secure custody account in minutes." },
+    { n: "02", t: "Verify Identity", d: "Standard encrypted KYC verification for asset safety." },
+    { n: "03", t: "Fund Account", d: "Deposit via bank transfer, card, or digital payment." },
+    { n: "04", t: "Buy Gold", d: "Select exact grams or standard bullion bars at spot price." },
+    { n: "05", t: "Vault or Ship", d: "Hold in insured vaults or request direct home delivery." },
   ];
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20">
-      <div className="mb-12 text-center">
-        <span className="text-xs font-semibold uppercase tracking-widest text-gold">Simple Process</span>
-        <h2 className="mt-2 text-3xl font-bold md:text-4xl">From signup to gold in minutes</h2>
-        <p className="mt-3 text-muted-foreground">No paperwork. No middlemen. Just real gold.</p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-5">
-        {steps.map((s) => (
-          <Card key={s.n} className="group relative overflow-hidden border-border/60 bg-card transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-gold">
-            <div className="absolute right-3 top-3 text-5xl font-bold text-gold/10 transition-colors group-hover:text-gold/20">{s.n}</div>
-            <CardContent className="relative p-6">
-              <div className="text-gradient-gold text-sm font-bold">Step {s.n}</div>
-              <h3 className="mt-2 font-semibold">{s.t}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
-            </CardContent>
-          </Card>
-        ))}
+    <section className="border-t border-border/60 bg-muted/20 py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 text-center sm:mb-12">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Process</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Straightforward Gold Custody</h2>
+          <p className="mt-1 text-muted-foreground max-w-xl mx-auto text-xs sm:text-sm leading-relaxed">Direct allocation of precious metals without intermediaries.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {steps.map((s) => (
+            <Card key={s.n} className="border-border/70 bg-card shadow-card p-5 transition-all hover:border-primary/40">
+              <div className="text-xs font-bold uppercase tracking-wider text-primary">Step {s.n}</div>
+              <h3 className="font-display mt-2 font-semibold text-sm sm:text-base text-foreground">{s.t}</h3>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{s.d}</p>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -237,56 +610,64 @@ function HowItWorks() {
 
 function ProductHighlight() {
   return (
-    <section className="relative overflow-hidden bg-card/30 py-20">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 md:grid-cols-2 md:items-center">
+    <section className="py-16 sm:py-20">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-2 md:items-center lg:px-8">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Invest</span>
-          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
-            Fractional gold investing,
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Fractional Ownership</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+            Fractional Gold Investing,
             <br />
-            <span className="text-gradient-gold">made simple.</span>
+            <span className="text-primary">Accessible From $10.</span>
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Start with as little as $10. Buy and sell digital gold instantly at the live spot price.
-            Track performance, build your portfolio, withdraw anytime.
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed sm:text-sm md:text-base">
+            Buy and sell digital gold instantly at live market spot rates. Track portfolio growth, adjust allocations, and withdraw funds at any time.
           </p>
-          <ul className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-            {["Live spot pricing", "Zero hidden fees", "Sell back instantly", "Backed 1:1 by physical gold"].map((i) => (
-              <li key={i} className="flex items-center gap-2 rounded-lg border border-border/50 bg-background/50 px-3 py-2">
-                <CheckCircle2 className="h-4 w-4 text-gold" /> {i}
+          <ul className="mt-5 grid gap-2 text-xs sm:grid-cols-2">
+            {[
+              "Live market spot pricing",
+              "Transparent low custody fees",
+              "Instant sell & settlement",
+              "100% physically backed reserves",
+            ].map((i) => (
+              <li key={i} className="flex items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-2 text-foreground font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                <span>{i}</span>
               </li>
             ))}
           </ul>
-          <Button asChild className="mt-8 rounded-full bg-gradient-gold text-gold-foreground shadow-gold hover:opacity-90">
-            <Link to="/invest">Start investing <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          <Button asChild className="mt-6 shadow-xs">
+            <Link to="/invest">Start Investing Now <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
           </Button>
         </div>
-        <Card className="relative overflow-hidden border-border/60 bg-background ring-gold-soft">
-          <CardContent className="p-8">
+
+        <Card className="border-border/70 bg-card shadow-card">
+          <CardContent className="p-5 sm:p-6 md:p-8">
             <div className="flex items-baseline justify-between">
-              <span className="text-muted-foreground text-sm">Sample portfolio</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">
-                <TrendingUp className="h-3 w-3" /> +8.2%
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sample Portfolio</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald/30 bg-emerald/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-500">
+                <TrendingUp className="h-3 w-3" /> +8.2% Past Year
               </span>
             </div>
-            <div className="mt-4 text-5xl font-bold text-gradient-gold">$12,840.50</div>
-            <div className="text-sm text-muted-foreground">past 12 months · 84.2 g held</div>
-            <div className="relative mt-8 h-40 overflow-hidden rounded-xl bg-gradient-to-tr from-gold/10 via-transparent to-ruby/5">
-              <svg viewBox="0 0 400 160" className="h-full w-full" preserveAspectRatio="none">
+            <div className="font-display mt-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl">$12,840.50</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Total weight: 84.20 grams · 100% Allocated</div>
+
+            <div className="relative mt-5 h-32 w-full overflow-hidden rounded-xl border border-border/60 bg-muted/20 p-2">
+              <svg viewBox="0 0 400 120" className="h-full w-full" preserveAspectRatio="none">
                 <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.78 0.14 84)" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="oklch(0.78 0.14 84)" stopOpacity="0" />
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <path d="M0,120 L40,100 L80,110 L120,80 L160,90 L200,60 L240,70 L280,40 L320,50 L360,30 L400,20 L400,160 L0,160 Z" fill="url(#grad)" />
-                <path d="M0,120 L40,100 L80,110 L120,80 L160,90 L200,60 L240,70 L280,40 L320,50 L360,30 L400,20" fill="none" stroke="oklch(0.78 0.14 84)" strokeWidth="2" />
+                <path d="M0,90 L40,80 L80,85 L120,65 L160,70 L200,50 L240,55 L280,35 L320,40 L360,25 L400,15 L400,120 L0,120 Z" fill="url(#chartGrad)" />
+                <path d="M0,90 L40,80 L80,85 L120,65 L160,70 L200,50 L240,55 L280,35 L320,40 L360,25 L400,15" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </div>
-            <div className="mt-4 grid grid-cols-3 border-t border-border/50 pt-4 text-xs">
-              <div><div className="text-muted-foreground">1D</div><div className="text-emerald-400">+0.4%</div></div>
-              <div><div className="text-muted-foreground">1M</div><div className="text-emerald-400">+2.1%</div></div>
-              <div><div className="text-muted-foreground">YTD</div><div className="text-emerald-400">+8.2%</div></div>
+
+            <div className="mt-4 grid grid-cols-3 border-t border-border/60 pt-3 text-xs">
+              <div><div className="text-muted-foreground">1 Day</div><div className="font-semibold text-emerald-500">+0.4%</div></div>
+              <div><div className="text-muted-foreground">1 Month</div><div className="font-semibold text-emerald-500">+2.1%</div></div>
+              <div><div className="text-muted-foreground">Year to Date</div><div className="font-semibold text-emerald-500">+8.2%</div></div>
             </div>
           </CardContent>
         </Card>
@@ -297,41 +678,43 @@ function ProductHighlight() {
 
 function DeliverySection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20">
-      <div className="grid gap-10 md:grid-cols-2 md:items-center">
-        <div className="relative overflow-hidden rounded-3xl border border-border/60">
-          <img
-            src={deliveryTruck}
-            alt="Insured armored security courier truck delivering precious metals"
-            width={1280}
-            height={832}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-        </div>
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Storage & Delivery</span>
-          <h2 className="mt-2 text-3xl font-bold md:text-4xl">Insured every step of the way</h2>
-          <p className="mt-3 text-muted-foreground">
-            Whether you store in a vault or take physical delivery, every gram is fully insured by Lloyd's of London.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-1">
-            {[
-              { i: Truck, t: "Insured delivery", d: "Brinks, Loomis & Malca-Amit. 3–7 business days globally." },
-              { i: Vault, t: "Vault storage", d: "Free first-year storage in Dubai, Zurich, Singapore or London vaults." },
-              { i: Award, t: "Certificates", d: "Receive a serialized PDF certificate for every bar you own." },
-            ].map(({ i: Icon, t, d }) => (
-              <div key={t} className="flex gap-4 rounded-xl border border-border/60 bg-card/60 p-5 transition-colors hover:border-gold/40">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-gold text-gold-foreground shadow-gold">
-                  <Icon className="h-5 w-5" />
+    <section className="border-t border-border/60 bg-muted/20 py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-8 md:grid-cols-2 md:items-center">
+          <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+            <img
+              src={deliveryTruck}
+              alt="Insured armored security courier delivering precious metals"
+              width={1280}
+              height={832}
+              loading="lazy"
+              className="h-full w-full object-cover aspect-[4/3]"
+            />
+          </div>
+
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Logistics &amp; Security</span>
+            <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Insured Protection at Every Step</h2>
+            <p className="mt-2 text-xs text-muted-foreground leading-relaxed sm:text-sm">
+              Whether you store your bars in our global vaults or choose direct delivery, every gram is insured against transit risk and loss by Lloyd's of London.
+            </p>
+            <div className="mt-5 grid gap-3">
+              {[
+                { i: Truck, t: "Insured Global Courier Delivery", d: "Dispatched via Brinks, Loomis, and Malca-Amit. Standard delivery in 3–7 business days." },
+                { i: Vault, t: "Secure Vault Storage", d: "First-year storage included in Zurich, Dubai, Singapore, and London depository vaults." },
+                { i: Award, t: "Serialized Certificates", d: "Receive an authenticated, serialized digital certificate for each minted bar in your custody." },
+              ].map(({ i: Icon, t, d }) => (
+                <div key={t} className="flex gap-3.5 rounded-xl border border-border/70 bg-card p-4 shadow-2xs transition-colors hover:border-primary/40">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-sm font-semibold text-foreground">{t}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{d}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">{t}</h3>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{d}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -341,108 +724,61 @@ function DeliverySection() {
 
 function CardSection() {
   return (
-    <section className="relative overflow-hidden border-y border-border/40 bg-gradient-to-br from-card/60 via-background to-background py-24">
-      {/* Ambient glows */}
-      <div className="pointer-events-none absolute -left-40 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-gold/15 blur-[140px]" />
-      <div className="pointer-events-none absolute -right-40 top-0 h-96 w-96 rounded-full bg-emerald/15 blur-[140px]" />
-
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 md:grid-cols-2 md:items-center">
-        {/* Animated tilting card mockup */}
-        <div className="relative mx-auto w-full max-w-md [perspective:1200px]">
-          <div className="absolute -inset-10 rounded-[2rem] bg-gradient-gold opacity-20 blur-3xl" />
-          <div className="group relative aspect-[1.586/1] w-full transition-transform duration-700 ease-out [transform-style:preserve-3d] hover:[transform:rotateY(-8deg)_rotateX(6deg)_scale(1.02)]">
-            {/* Card image */}
+    <section className="py-16 sm:py-20">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-2 md:items-center lg:px-8">
+        <div className="relative mx-auto w-full max-w-md">
+          <div className="overflow-hidden rounded-2xl border border-border/80 bg-card p-4 shadow-card">
             <img
               src={amiraCardHero}
-              alt="Amira Gold Card concept — black metal with gold rim and emerald accent"
+              alt="Amira Gold Card concept — solid black metal with gold rim"
               width={1280}
               height={832}
               loading="lazy"
-              className="absolute inset-0 h-full w-full rounded-3xl object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)]"
+              className="h-auto w-full rounded-xl object-contain"
             />
-            {/* Overlayed text on card */}
-            <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-7 [transform:translateZ(40px)]">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-gold/90">Amira</div>
-                  <div className="font-display text-lg font-semibold text-foreground/95">Gold Card</div>
-                </div>
-                <span className="rounded-full border border-emerald/40 bg-emerald/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-emerald backdrop-blur">
-                  Concept
-                </span>
-              </div>
-              <div>
-                <div className="font-mono text-sm tracking-[0.35em] text-foreground/85">•••• •••• •••• 8417</div>
-                <div className="mt-3 flex items-end justify-between text-[10px] uppercase tracking-widest text-foreground/70">
-                  <div>
-                    <div className="opacity-70">Member</div>
-                    <div className="mt-0.5 text-foreground/90">A. Aldahab</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="opacity-70">Exp</div>
-                    <div className="mt-0.5 font-mono text-foreground/90">12/30</div>
-                  </div>
-                </div>
-              </div>
+            <div className="mt-3 flex items-center justify-between px-2 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Amira Gold Metal Debit Card</span>
+              <span className="text-[11px] font-semibold text-primary">Pre-Release</span>
             </div>
-            {/* Subtle shine */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
-              <div className="absolute -inset-1 animate-shimmer opacity-30" />
-            </div>
-          </div>
-
-          <div className="relative mt-6 flex items-center justify-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span className="h-px w-8 bg-border" />
-            Concept render · Hover to tilt
-            <span className="h-px w-8 bg-border" />
           </div>
         </div>
 
-        {/* Copy + waitlist CTA */}
         <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-emerald">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3.5 w-3.5" /> Coming 2026
           </span>
-          <h2 className="mt-4 text-3xl font-bold md:text-5xl">
-            Spend your gold,
-            <br />
-            <span className="text-gradient-gold">anywhere.</span>
+          <h2 className="font-display mt-2 text-2xl font-bold tracking-tight text-foreground md:text-4xl">
+            Spend Directly From Your Gold Balance.
           </h2>
-          <p className="mt-5 max-w-lg text-muted-foreground">
-            The Amira Gold Card converts your allocated gold to local currency at
-            the point of sale — accepted everywhere Visa is. No conversion fees,
-            no holding cash, no inflation drag.
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed sm:text-sm md:text-base">
+            The Amira Gold Card converts your allocated gold holdings to local currency at the point of sale. Accepted worldwide across the global Visa network with zero foreign transaction fees.
           </p>
 
-          <ul className="mt-7 grid gap-3 sm:grid-cols-2">
+          <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
             {[
-              { i: CreditCard, t: "Tap & pay globally" },
-              { i: Globe, t: "180+ currencies, no FX fees" },
-              { i: Wallet, t: "Spend directly from gold" },
-              { i: ShieldCheck, t: "Apple Pay & Google Pay" },
+              { i: CreditCard, t: "Tap & pay worldwide" },
+              { i: Globe, t: "180+ currencies with no FX markup" },
+              { i: Wallet, t: "Direct spend from vaulted gold" },
+              { i: ShieldCheck, t: "Apple Pay & Google Pay ready" },
             ].map(({ i: Icon, t }) => (
-              <li key={t} className="flex items-center gap-2 rounded-lg border border-border/50 bg-background/40 px-3 py-2 text-sm">
-                <Icon className="h-4 w-4 text-gold" /> {t}
+              <li key={t} className="flex items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-2 text-xs font-medium text-foreground">
+                <Icon className="h-4 w-4 text-primary shrink-0" />
+                <span>{t}</span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-6 flex flex-wrap items-center gap-4">
             <WaitlistDialog
               trigger={
-                <Button size="lg" className="rounded-full bg-gradient-gold text-gold-foreground shadow-gold hover:opacity-90">
-                  Join the Waitlist <ArrowRight className="ml-1 h-4 w-4" />
+                <Button size="lg" className="shadow-xs">
+                  Join Card Waitlist <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
               }
             />
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="flex -space-x-2">
-                {["A", "M", "J", "K"].map((c, i) => (
-                  <div key={i} className="flex h-6 w-6 items-center justify-center rounded-full border border-background bg-gradient-gold text-[10px] font-bold text-gold-foreground">{c}</div>
-                ))}
-              </div>
-              <span><span className="font-semibold text-foreground">2,400+</span> on the waitlist</span>
-            </div>
+            <span className="text-xs text-muted-foreground">
+              <strong className="text-foreground font-semibold">2,400+</strong> investors on the waitlist
+            </span>
           </div>
         </div>
       </div>
@@ -452,22 +788,29 @@ function CardSection() {
 
 function CEOSection() {
   return (
-    <section className="mx-auto max-w-5xl px-4 py-20">
-      <div className="grid gap-10 rounded-3xl border border-border/60 bg-gradient-to-br from-card to-background p-10 md:grid-cols-[auto_1fr] md:items-center md:p-14">
-        <div className="relative mx-auto">
-          <div className="absolute inset-0 rounded-full bg-gradient-gold opacity-30 blur-2xl" />
-          <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-gold/40">
-            <img src={ceoPortrait} alt="Amira Aldahab, Founder & CEO" width={768} height={768} loading="lazy" className="h-full w-full object-cover" />
+    <section className="border-t border-border/60 bg-muted/20 py-16 sm:py-20">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-6 rounded-2xl border border-border/70 bg-card p-6 shadow-card md:grid-cols-[auto_1fr] md:items-center md:p-10">
+          <div className="relative mx-auto">
+            <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-primary/30 shadow-xs sm:h-28 sm:w-28">
+              <img
+                src={ceoPortrait}
+                alt="Amira Aldahab, Founder & CEO"
+                width={768}
+                height={768}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Founder Letter</span>
-          <blockquote className="mt-3 text-xl italic leading-snug text-foreground md:text-2xl">
-            "Gold has protected wealth for thousands of years. Our mission is to make
-            owning real gold simple, secure, and accessible to everyone."
-          </blockquote>
-          <div className="mt-4 font-semibold">Amira Aldahab</div>
-          <div className="text-sm text-muted-foreground">Founder & CEO, Amira Gold</div>
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Executive Message</span>
+            <blockquote className="mt-2 text-base italic leading-snug text-foreground sm:text-lg md:text-xl">
+              "Gold has safeguarded wealth through centuries of economic cycles. Our commitment is to provide transparent, direct, and secure physical gold custody for modern investors."
+            </blockquote>
+            <div className="mt-3 font-display font-semibold text-foreground">Amira Aldahab</div>
+            <div className="text-xs text-muted-foreground">Founder &amp; Chief Executive Officer, Amira Gold</div>
+          </div>
         </div>
       </div>
     </section>
@@ -476,35 +819,35 @@ function CEOSection() {
 
 function Testimonials() {
   const reviews = [
-    { n: "Sarah K.", role: "London, UK", r: "Smoothest gold buying experience I've had. Delivered in 4 days." },
-    { n: "Ahmed R.", role: "Dubai, UAE", r: "Love the vault storage. Feel completely secure with my holdings." },
-    { n: "Maya T.", role: "Singapore", r: "Started with $50, now I check my gold portfolio every morning." },
+    { n: "Sarah K.", role: "London, UK", r: "Clean interface, fast settlement, and fully insured delivery within 4 business days." },
+    { n: "Ahmed R.", role: "Dubai, UAE", r: "The vault allocation reports and serial certificate verification provide complete confidence." },
+    { n: "Maya T.", role: "Singapore", r: "Started with fractional purchases and built up to standard bars. Very transparent pricing." },
   ];
   return (
-    <section className="bg-card/30 py-20">
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="mb-10 text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Reviews</span>
-          <h2 className="mt-2 text-3xl font-bold md:text-4xl">Trusted by gold owners worldwide</h2>
+    <section className="py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 text-center sm:mb-10">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Client Feedback</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Trusted by Investors Worldwide</h2>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           {reviews.map((r) => (
-            <Card key={r.n} className="border-border/60 bg-background transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-gold">
-              <CardContent className="p-6">
-                <div className="flex gap-0.5 text-gold">
-                  {Array.from({ length: 5 }).map((_, i) => (<Star key={i} className="h-4 w-4 fill-current" />))}
+            <Card key={r.n} className="border-border/70 bg-card/90 shadow-card p-5">
+              <div className="flex gap-1 text-primary">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-primary" />
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-foreground/90 leading-relaxed">"{r.r}"</p>
+              <div className="mt-5 flex items-center gap-3 border-t border-border/50 pt-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {r.n[0]}
                 </div>
-                <p className="mt-4 text-sm leading-relaxed">"{r.r}"</p>
-                <div className="mt-5 flex items-center gap-3 border-t border-border/50 pt-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-gold text-sm font-bold text-gold-foreground">
-                    {r.n[0]}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold">{r.n}</div>
-                    <div className="text-xs text-muted-foreground">{r.role}</div>
-                  </div>
+                <div>
+                  <div className="font-display text-xs font-semibold text-foreground">{r.n}</div>
+                  <div className="text-[11px] text-muted-foreground">{r.role}</div>
                 </div>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
@@ -515,49 +858,53 @@ function Testimonials() {
 
 function FAQ() {
   const items = [
-    { q: "Is my gold really mine?", a: "Yes. Every gram you buy is allocated to you and stored in your name. You can request delivery anytime." },
-    { q: "Where is the gold stored?", a: "In LBMA-approved vaults in Zurich, Dubai, Singapore and London. Fully insured by Lloyd's of London." },
-    { q: "How fast is delivery?", a: "Insured courier delivery typically takes 3–7 business days globally via Brinks, Loomis or Malca-Amit." },
-    { q: "What's the minimum to invest?", a: "You can start investing in fractional digital gold from just $10. Buy and sell at the live spot price." },
-    { q: "How do you prove the gold exists?", a: "We publish an audited Proof of Reserves with vault-by-vault holdings updated regularly." },
+    { q: "Is the gold physically allocated in my name?", a: "Yes. Every gram and bar purchased is 100% allocated to you and held directly in your name in audited vault facilities under direct bailment law." },
+    { q: "Where are the depository vaults located?", a: "We operate within LBMA-approved vaults located in Zurich, Dubai, Singapore, London, Toronto, and Riyadh. All facilities are fully insured by Lloyd's of London." },
+    { q: "How does physical bar delivery work?", a: "You can request insured delivery of your bars at any time. Shipments are handled via specialized armored security carriers including Brinks, Loomis, and Malca-Amit." },
+    { q: "What is the minimum amount required to invest?", a: "You can begin investing in fractional gold from as little as $10 at live market spot rates." },
+    { q: "How do you verify proof of reserves?", a: "We publish regular, third-party audited Proof of Reserves reports with itemized vault-by-vault holdings reconciled directly with depository records." },
   ];
   return (
-    <section className="mx-auto max-w-3xl px-4 py-20">
-      <div className="text-center">
-        <span className="text-xs font-semibold uppercase tracking-widest text-gold">FAQ</span>
-        <h2 className="mt-2 text-3xl font-bold md:text-4xl">Frequently asked questions</h2>
+    <section className="border-t border-border/60 bg-muted/20 py-16 sm:py-20">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Frequently Asked Questions</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">Answers to Common Questions</h2>
+        </div>
+        <Accordion type="single" collapsible className="mt-6 space-y-2">
+          {items.map((i) => (
+            <AccordionItem key={i.q} value={i.q} className="border border-border/70 rounded-xl bg-card px-4">
+              <AccordionTrigger className="text-left font-display font-medium text-xs sm:text-sm text-foreground hover:no-underline py-3.5">
+                {i.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-xs text-muted-foreground leading-relaxed pb-3.5">
+                {i.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
-      <Accordion type="single" collapsible className="mt-10">
-        {items.map((i) => (
-          <AccordionItem key={i.q} value={i.q} className="border-border/50">
-            <AccordionTrigger className="text-left hover:text-gold">{i.q}</AccordionTrigger>
-            <AccordionContent className="text-muted-foreground">{i.a}</AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
     </section>
   );
 }
 
 function CTASection() {
   return (
-    <section className="px-4 pb-20">
-      <div
-        className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl border border-gold/30 p-10 md:p-16"
-        style={{
-          backgroundImage: `linear-gradient(110deg, oklch(0.18 0.012 250) 0%, oklch(0.18 0.012 250 / 0.85) 50%, transparent 100%), url(${vaultInterior})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="max-w-xl">
-          <h2 className="text-3xl font-bold md:text-4xl">Start owning real gold today</h2>
-          <p className="mt-3 text-muted-foreground">No paperwork. Buy in minutes. Stored in insured vaults — or shipped to your door.</p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="rounded-full bg-gradient-gold text-gold-foreground shadow-gold hover:opacity-90">
-              <Link to="/auth">Open Account</Link>
+    <section className="px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div className="mx-auto max-w-7xl rounded-2xl border border-primary/30 bg-card p-6 shadow-card sm:p-10 md:p-12">
+        <div className="max-w-2xl">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Get Started</span>
+          <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+            Start Your Gold Custody Account Today
+          </h2>
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed sm:text-sm">
+            Open an account in minutes. Buy physical bullion bars or fractional gold backed by insured global vaults, with optional doorstep delivery.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Button asChild size="lg" className="shadow-xs font-semibold">
+              <Link to="/auth">Open Free Account <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full border-border/60 bg-card/60 backdrop-blur">
+            <Button asChild size="lg" variant="outline" className="border-border/70">
               <Link to="/buy">Browse Gold Bars</Link>
             </Button>
           </div>

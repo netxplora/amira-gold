@@ -28,23 +28,33 @@ function AuthPage() {
   }, [user, navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-charcoal px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="mb-6 flex justify-center"><Logo /></div>
-        <Card className="border-border/60 bg-card shadow-gold">
-          <CardContent className="p-6">
+    <div className="flex min-h-screen items-center justify-center bg-background bg-mesh-luxury px-4 py-16">
+      <div className="w-full max-w-md animate-fade-in">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <Logo />
+          <h2 className="font-display mt-4 text-2xl font-bold tracking-tight text-foreground">
+            Client Portal
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Access your secure gold vault and investment account
+          </p>
+        </div>
+        <Card className="border-border/70 bg-card/90 backdrop-blur-xl shadow-2xl rounded-2xl">
+          <CardContent className="p-7 md:p-8">
             <Tabs defaultValue="signin">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign in</TabsTrigger>
-                <TabsTrigger value="signup">Sign up</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Register</TabsTrigger>
               </TabsList>
               <TabsContent value="signin"><SignInForm /></TabsContent>
               <TabsContent value="signup"><SignUpForm /></TabsContent>
             </Tabs>
           </CardContent>
         </Card>
-        <div className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">← Back to homepage</Link>
+        <div className="mt-8 text-center text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-foreground transition-colors">
+            ← Return to homepage
+          </Link>
         </div>
       </div>
     </div>

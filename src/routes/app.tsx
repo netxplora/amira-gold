@@ -69,9 +69,11 @@ function AppLayout() {
   return (
     <div className="flex min-h-screen bg-background bg-mesh-luxury">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-border/50 bg-sidebar/80 p-4 backdrop-blur md:flex">
-        <Logo />
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-sidebar/90 p-5 backdrop-blur-xl md:flex">
+        <div className="px-1 py-1">
+          <Logo />
+        </div>
+        <nav className="mt-8 flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
           {navItems.map((i) => {
             const active = i.exact ? loc.pathname === i.to : loc.pathname.startsWith(i.to);
             const Icon = i.icon;
@@ -80,14 +82,14 @@ function AppLayout() {
               <Link
                 key={i.to}
                 to={i.to}
-                className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ${
+                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
                   active
-                    ? "bg-gradient-gold text-gold-foreground shadow-gold"
-                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                    ? "bg-primary/15 text-primary font-semibold border-l-[3px] border-primary pl-2.5 shadow-sm"
+                    : "text-muted-foreground hover:bg-accent/70 hover:text-foreground"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${active ? "" : "group-hover:text-gold"}`} />
-                <span className="flex-1">{i.label}</span>
+                <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
+                <span className="flex-1 truncate">{i.label}</span>
                 {showBadge && (
                   <span className="rounded-full bg-ruby px-1.5 py-0.5 text-[10px] font-bold text-ruby-foreground">{unread}</span>
                 )}
@@ -95,22 +97,22 @@ function AppLayout() {
             );
           })}
           {isAdmin && (
-            <Link to="/admin" className="mt-4 flex items-center gap-3 rounded-lg border border-gold/40 bg-gold/5 px-3 py-2 text-sm text-gold hover:bg-gold/10">
+            <Link to="/admin" className="mt-3 flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
               <Shield className="h-4 w-4" /> Admin Console
             </Link>
           )}
         </nav>
-        <div className="mt-4 rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+        <div className="mt-4 rounded-xl border border-border/70 bg-card/70 p-3.5 text-xs text-muted-foreground shadow-sm">
           <div className="font-semibold text-foreground">Need help?</div>
-          <p className="mt-1">Live chat with our concierge — replies in minutes.</p>
-          <Link to="/app/support" className="mt-2 inline-flex items-center gap-1 text-gold hover:underline">
+          <p className="mt-1 leading-relaxed">Live chat with our concierge — replies in minutes.</p>
+          <Link to="/app/support" className="mt-2.5 inline-flex items-center gap-1 font-medium text-primary hover:underline">
             Open chat →
           </Link>
         </div>
         <div className="mt-3">
           <ThemeToggle variant="inline" />
         </div>
-        <Button variant="ghost" size="sm" onClick={signOut} className="mt-3 justify-start">
+        <Button variant="ghost" size="sm" onClick={signOut} className="mt-2 justify-start text-muted-foreground hover:text-foreground">
           <LogOut className="mr-2 h-4 w-4" /> Sign out
         </Button>
       </aside>
@@ -178,12 +180,12 @@ function AppLayout() {
         </div>
       )}
 
-      <main className="flex flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-background/70 px-4 backdrop-blur md:px-8">
-          <div className="flex items-center gap-2 md:hidden">
+      <main className="flex flex-1 flex-col overflow-x-hidden">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/60 bg-background/80 px-4 backdrop-blur-xl md:px-8">
+          <div className="flex items-center gap-3 md:hidden">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card/40"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-card/60 transition-colors hover:bg-accent"
               aria-label="Open menu"
             >
               <Menu className="h-4 w-4" />
@@ -197,7 +199,7 @@ function AppLayout() {
             <CommandPalette />
             <MiniCart />
             <ThemeToggle />
-            <Link to="/app/notifications" className="relative rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground">
+            <Link to="/app/notifications" className="relative rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               <Bell className="h-4 w-4" />
               {unread > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ruby px-1 text-[9px] font-bold text-ruby-foreground">
@@ -205,19 +207,19 @@ function AppLayout() {
                 </span>
               )}
             </Link>
-            <div className="hidden text-right text-xs sm:block">
-              <div className="text-muted-foreground">Signed in</div>
-              <div className="font-medium">{user.email}</div>
+            <div className="hidden text-right text-xs sm:block pl-2 border-l border-border/60">
+              <div className="text-muted-foreground text-[11px]">Signed in</div>
+              <div className="font-medium text-foreground truncate max-w-[140px]">{user.email}</div>
             </div>
-            <Button variant="ghost" size="icon" onClick={signOut} className="md:hidden"><LogOut className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" onClick={signOut} className="md:hidden" aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
           </div>
         </header>
-        <div className="flex-1 p-4 pb-24 md:p-8 md:pb-8">
+        <div className="flex-1 p-4 pb-24 md:p-8 md:pb-12 max-w-7xl w-full mx-auto animate-fade-in">
           <Outlet />
         </div>
 
         {/* Mobile bottom nav */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-card/95 backdrop-blur md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/90 backdrop-blur-xl md:hidden">
           <div className="grid grid-cols-5">
             {navItems.slice(0, 5).map((i) => {
               const active = i.exact ? loc.pathname === i.to : loc.pathname.startsWith(i.to);

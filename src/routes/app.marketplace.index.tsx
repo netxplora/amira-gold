@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useGoldPrice, formatUSD } from "@/lib/gold-price";
 import { calcJewelryPrice, useCart, type JewelryCategory, type JewelryProduct } from "@/lib/jewelry";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingCart, Sparkles } from "lucide-react";
+import { ShoppingCart, Gem } from "lucide-react";
 
 export const Route = createFileRoute("/app/marketplace/")({
   component: MarketplacePage,
@@ -27,11 +27,7 @@ export const Route = createFileRoute("/app/marketplace/")({
   head: () => ({
     meta: [
       { title: "Jewelry Marketplace — Amira Gold" },
-      { name: "description", content: "Shop curated 18k, 22k, and 24k gold jewelry. Transparent pricing updated with live gold rates." },
-      { property: "og:title", content: "Amira Gold Jewelry Marketplace" },
-      { property: "og:description", content: "Exquisite gold jewelry with real-time pricing and secure global delivery." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" }
+      { name: "description", content: "Curated 18k, 22k, and 24k solid gold jewelry priced against live market rates." },
     ]
   }),
 });
@@ -42,7 +38,6 @@ function MarketplacePage() {
   const products = data?.products || [];
   const { pricePerGram } = useGoldPrice();
   const cart = useCart();
-  const [loading, setLoading] = useState(false);
 
   const [cat, setCat] = useState<string>("all");
   const [purity, setPurity] = useState<string>("all");
@@ -63,78 +58,89 @@ function MarketplacePage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Fine Jewelry Collection"
         title="Jewelry Marketplace"
-        subtitle="Curated 18k–24k gold jewelry. Prices update with the live gold rate."
+        subtitle="Solid 18k–24k gold jewelry items with live pricing calculated against precious metal market rates."
+        icon={<Gem className="h-6 w-6" />}
         actions={
-          <Button asChild variant="outline" className="gap-2">
-            <Link to="/app/cart"><ShoppingCart className="h-4 w-4" /> Cart {cart.count > 0 && <Badge className="ml-1">{cart.count}</Badge>}</Link>
+          <Button asChild variant="outline" className="border-border/70 shadow-xs font-semibold gap-2">
+            <Link to="/app/cart"><ShoppingCart className="h-4 w-4" /> Cart {cart.count > 0 && <Badge className="ml-1 px-1.5 py-0.2 text-[10px]">{cart.count}</Badge>}</Link>
           </Button>
         }
       />
 
-      <Card className="border-border/60">
-        <CardContent className="grid gap-3 p-4 md:grid-cols-4">
-          <div>
-            <Label className="text-xs">Category</Label>
+      <Card className="border-border/70 bg-card shadow-card">
+        <CardContent className="grid gap-3 p-4 sm:p-5 sm:grid-cols-2 md:grid-cols-4">
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Category</Label>
             <Select value={cat} onValueChange={setCat}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs border-border/70"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label className="text-xs">Purity</Label>
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Gold Karat Purity</Label>
             <Select value={purity} onValueChange={setPurity}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs border-border/70"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All purities</SelectItem>
-                <SelectItem value="18k">18k</SelectItem>
-                <SelectItem value="22k">22k</SelectItem>
-                <SelectItem value="24k">24k</SelectItem>
+                <SelectItem value="all">All Purities</SelectItem>
+                <SelectItem value="18k">18k (750 Fine)</SelectItem>
+                <SelectItem value="21k">21k (875 Fine)</SelectItem>
+                <SelectItem value="22k">22k (916 Fine)</SelectItem>
+                <SelectItem value="24k">24k (999.9 Pure)</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label className="text-xs">Min price</Label>
-            <Input type="number" inputMode="decimal" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" />
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Min Price (USD)</Label>
+            <Input type="number" inputMode="decimal" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" className="h-9 text-xs border-border/70" />
           </div>
-          <div>
-            <Label className="text-xs">Max price</Label>
-            <Input type="number" inputMode="decimal" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="No limit" />
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Max Price (USD)</Label>
+            <Input type="number" inputMode="decimal" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="No limit" className="h-9 text-xs border-border/70" />
           </div>
         </CardContent>
       </Card>
 
-      {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-72 animate-pulse rounded-xl border border-border/40 bg-muted/30" />)}
-        </div>
-      ) : filtered.length === 0 ? (
-        <Card><CardContent className="p-12 text-center text-muted-foreground"><Sparkles className="mx-auto mb-2 h-8 w-8 opacity-40" />No products match your filters.</CardContent></Card>
+      {filtered.length === 0 ? (
+        <Card className="border-border/70 bg-card shadow-card">
+          <CardContent className="p-12 text-center text-xs text-muted-foreground">
+            <Gem className="mx-auto mb-2 h-8 w-8 opacity-30" />
+            <p className="font-display text-sm font-semibold text-foreground">No jewelry items match your filter selection.</p>
+            <p className="mt-1">Try selecting a different category or adjusting the price range.</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p) => {
             const price = calcJewelryPrice(p, pricePerGram);
             return (
               <Link key={p.id} to="/app/marketplace/$slug" params={{ slug: p.slug }} className="group">
-                <Card className="overflow-hidden border-border/60 transition-all hover:border-gold/60 hover:shadow-gold">
-                  <div className="relative aspect-square overflow-hidden bg-muted/40">
-                    {p.thumbnail_url
-                      ? <img src={p.thumbnail_url} alt={p.name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                      : <div className="flex h-full w-full items-center justify-center text-muted-foreground">No image</div>}
-                    <Badge className="absolute right-2 top-2 bg-background/80 text-foreground backdrop-blur">{p.purity}</Badge>
-                    {p.stock_quantity === 0 && <div className="absolute inset-0 flex items-center justify-center bg-background/70 text-sm font-semibold">Out of stock</div>}
+                <Card className="card-3d h-full overflow-hidden border-border/70 bg-card p-0 flex flex-col justify-between">
+                  <div className="relative aspect-square overflow-hidden bg-muted/30">
+                    {p.thumbnail_url ? (
+                      <img src={p.thumbnail_url} alt={p.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">No image</div>
+                    )}
+                    <Badge className="absolute right-2 top-2 border-border/70 bg-background/90 text-foreground text-[10px] font-semibold backdrop-blur" variant="outline">
+                      {p.purity}
+                    </Badge>
+                    {p.stock_quantity === 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 text-xs font-semibold">Out of stock</div>
+                    )}
                   </div>
-                  <CardContent className="space-y-1 p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="line-clamp-1 font-semibold">{p.name}</h3>
-                      <span className="shrink-0 text-xs text-muted-foreground">{p.weight_grams}g</span>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start justify-between gap-1">
+                      <h3 className="line-clamp-1 font-display text-xs font-semibold text-foreground sm:text-sm">{p.name}</h3>
+                      <span className="shrink-0 text-[10px] text-muted-foreground sm:text-xs">{p.weight_grams}g</span>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-lg font-bold text-gold">{formatUSD(price.total)}</span>
-                      <span className="text-[11px] text-muted-foreground">incl. making</span>
+                    <div className="mt-2 flex items-baseline justify-between border-t border-border/40 pt-2">
+                      <span className="font-display text-xs font-bold text-primary sm:text-base">{formatUSD(price.total)}</span>
+                      <span className="text-[10px] text-muted-foreground">live rate</span>
                     </div>
                   </CardContent>
                 </Card>

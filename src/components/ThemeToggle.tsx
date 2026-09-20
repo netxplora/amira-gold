@@ -21,11 +21,10 @@ export function ThemeToggle({ variant = "icon", className }: Props) {
         <button
           type="button"
           onClick={() => setTheme("light")}
-          className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
-            resolved === "light"
-              ? "bg-primary text-primary-foreground shadow-2xs"
-              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-          }`}
+          className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${resolved === "light"
+            ? "bg-primary text-primary-foreground shadow-2xs"
+            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+            }`}
           aria-pressed={resolved === "light"}
           aria-label="Use light mode"
         >
@@ -35,11 +34,10 @@ export function ThemeToggle({ variant = "icon", className }: Props) {
         <button
           type="button"
           onClick={() => setTheme("dark")}
-          className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
-            resolved === "dark"
-              ? "bg-primary text-primary-foreground shadow-2xs"
-              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-          }`}
+          className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${resolved === "dark"
+            ? "bg-primary text-primary-foreground shadow-2xs"
+            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+            }`}
           aria-pressed={resolved === "dark"}
           aria-label="Use dark mode"
         >

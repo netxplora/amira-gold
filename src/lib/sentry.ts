@@ -1,7 +1,9 @@
 import * as Sentry from "@sentry/react";
 
 export const initSentry = () => {
-  if (import.meta.env.MODE !== "production") {
+  // Prevent Sentry from initializing on the server during SSR.
+  // @sentry/react integrations will crash Node.js because they expect browser APIs.
+  if (typeof window === "undefined" || import.meta.env.MODE !== "production") {
     return;
   }
 

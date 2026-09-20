@@ -95,13 +95,13 @@
   },
   "lavamoat": {
     "allowScripts": {
-      "@cloudflare/vite-plugin>miniflare>sharp#0.34.5": false,
-      "@cloudflare/vite-plugin>wrangler>esbuild#0.27.3": false,
-      "@cloudflare/vite-plugin>wrangler>workerd#1.20260410.1": false,
-      "@lovable.dev/vite-tanstack-config>lovable-tagger>esbuild#0.25.12": false,
-      "jspdf>core-js#3.49.0": false,
-      "vite>esbuild#0.27.7": false,
-      "vite>tsx>esbuild#0.27.7": false
+      "@cloudflare/vite-plugin>miniflare>sharp#0.34.5": true,
+      "@cloudflare/vite-plugin>wrangler>esbuild#0.27.3": true,
+      "@cloudflare/vite-plugin>wrangler>workerd#1.20260410.1": true,
+      "@lovable.dev/vite-tanstack-config>lovable-tagger>esbuild#0.25.12": true,
+      "jspdf>core-js#3.49.0": true,
+      "vite>esbuild#0.27.7": true,
+      "vite>tsx>esbuild#0.27.7": true
     }
   }
 }

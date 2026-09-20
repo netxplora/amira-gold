@@ -92,5 +92,16 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@cloudflare/vite-plugin>miniflare>sharp#0.34.5": false,
+      "@cloudflare/vite-plugin>wrangler>esbuild#0.27.3": false,
+      "@cloudflare/vite-plugin>wrangler>workerd#1.20260410.1": false,
+      "@lovable.dev/vite-tanstack-config>lovable-tagger>esbuild#0.25.12": false,
+      "jspdf>core-js#3.49.0": false,
+      "vite>esbuild#0.27.7": false,
+      "vite>tsx>esbuild#0.27.7": false
+    }
   }
 }

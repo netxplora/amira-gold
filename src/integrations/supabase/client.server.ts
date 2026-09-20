@@ -10,9 +10,13 @@ function createSupabaseAdminClient() {
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error(
-      'Missing Supabase server environment variables. Ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.'
+    // Do not throw here — throwing at module import time causes a 500 on every
+    // SSR request even for pages that never call admin operations.
+    // The error will surface naturally when an admin operation is attempted.
+    console.warn(
+      '[supabaseAdmin] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set. Admin operations will fail.'
     );
+    return null as unknown as ReturnType<typeof createClient<Database>>;
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
